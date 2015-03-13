@@ -1,0 +1,18 @@
+{
+  "name": "foul",
+  "version": "0.0.1",
+  "description": "",
+  "main": "search.coffee",
+  "dependencies": {
+    "colors": "^1.0.3",
+    "lodash": "^3.5.0",
+    "moment": "^2.9.0",
+    "request": "^2.53.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
