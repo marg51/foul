@@ -1,0 +1,10 @@
+home#login,2
+home#bookings,1
+home#createJob,1
+messages#viewJob,2
+messages#home,1
+login#home,1
+login#messages,1
+message#home,2
+createjob#messages,1
+profiles_edit#messages,1

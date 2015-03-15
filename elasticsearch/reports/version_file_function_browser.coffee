@@ -4,41 +4,49 @@ require('colors')
 
 request.post('http://localhost:9200/foul/track/_search', json: {
   "aggs": {
-    "file": {
+    "value": {
       "terms": {
         "field": "appVersion"
       },
       "aggs": {
-          "function": {
+        "value": {
+          "terms": {
+            "field": "file"
+          },
+          "aggs": {
+            "value": {
               "terms": {
-                  "field": "file"
+                "field": "functionName"
               },
               "aggs": {
-              "version": {
+                "value": {
                   "terms": {
-                      "field": "functionName"
+                    "field": "browser"
                   },
                   "aggs": {
-                      "browser": {
-                          "terms": {
-                              "field": "browser"
-                          }
+                    "value": {
+                      "terms": {
+                        "field": "browserVersion"
                       }
+                    }
                   }
+                }
               }
+            }
           }
-          }
+        }
       }
     }
   }
 }, (err, http, body) -> 
-  console.log (body.took+"ms").green.underline
-  _.map body.aggregations.file.buckets, (e) ->
+  _.map body.aggregations.value.buckets, (e) ->
       console.log e.key.cyan,"(",(e.doc_count+"").cyan,")"
-      _.map e.function.buckets, (f) ->
+      _.map e.value.buckets, (f) ->
           console.log " •", (f.key+"").magenta,"(",(f.doc_count+"").red,")"
-          _.map f.version.buckets, (g) ->
+          _.map f.value.buckets, (g) ->
               console.log "   ›", (g.key+"").white,"(",(g.doc_count+"").white,")"
-              _.map g.browser.buckets, (h) ->
+              _.map g.value.buckets, (h) ->
                   console.log "      ›", (h.key+"").gray,"(",(h.doc_count+"").gray,")"
+
+    console.log require('../toCsv')(body.aggregations)
 )

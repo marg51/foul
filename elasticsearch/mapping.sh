@@ -2,7 +2,7 @@
 
 x="curl http://localhost:9200"
 
-$x/foul -XDELETE
+# $x/foul -XDELETE
 $x/foul/ -XPUT -d '{
 "mappings": {
   "track" : {
@@ -13,6 +13,10 @@ $x/foul/ -XPUT -d '{
       },
       "browser" : {
         "type" : "string",
+        "index": "not_analyzed"
+      },
+      "browserVersion": {
+        "type": "long",
         "index": "not_analyzed"
       },
       "user" : {
@@ -43,7 +47,19 @@ $x/foul/ -XPUT -d '{
         "type" : "string",
         "index": "not_analyzed"
       },
-      "params" : {
+      "stateParams" : {
+        "type" : "string",
+        "index": "not_analyzed"
+      },
+      "type" : {
+        "type" : "string",
+        "index": "not_analyzed"
+      },
+      "category" : {
+        "type" : "string",
+        "index": "not_analyzed"
+      },
+      "message" : {
         "type" : "string",
         "index": "not_analyzed"
       }

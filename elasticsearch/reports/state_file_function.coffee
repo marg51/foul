@@ -1,22 +1,23 @@
 request = require('request')
 _ = require('lodash')
 require('colors')
+moment = require('moment')
 
 request.post('http://localhost:9200/foul/track/_search', json: {
   "aggs": {
-    "file": {
+    "value": {
       "terms": {
-        "field": "file"
+        "field": "state"
       },
       "aggs": {
-        "function": {
+        "value": {
           "terms": {
-            "field": "functionName"
+            "field": "file"
           },
           "aggs": {
-            "version": {
+            "value": {
               "terms": {
-                "field": "appVersion"
+                "field": "functionName"
               }
             }
           }
@@ -25,10 +26,14 @@ request.post('http://localhost:9200/foul/track/_search', json: {
     }
   }
 }, (err, http, body) -> 
-    _.map body.aggregations.file.buckets, (e) ->
+    # console.log JSON.stringify(body,null,2)
+    console.log require('../toCsv')(body.aggregations)
+
+    _.map body.aggregations.value.buckets, (e) ->
         console.log e.key.cyan,"(",(e.doc_count+"").cyan,")"
-        _.map e.function.buckets, (f) ->
+        _.map e.value.buckets, (f) ->
             console.log " •", (f.key+"").magenta,"(",(f.doc_count+"").red,")"
-            _.map f.version.buckets, (g) ->
+            _.map f.value.buckets, (g) ->
                 console.log "   ›", (g.key+"").gray,"(",(g.doc_count+"").gray,")"
+
 )

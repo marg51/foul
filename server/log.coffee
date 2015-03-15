@@ -1,26 +1,39 @@
 require('colors')
 fs = require('fs')
 _ = require('lodash')
+cdl = require('cardinal')
+config = require('./config')
 
 exports.displayFiles = (errors) ->
 
+	console.log errors.message.magenta.bgWhite
 	_.map errors.stack, (e, i) ->
 		displayFile(e, (if i is 0 then errors.message else ""))
 
 
 displayFile = (stack, message="") ->
 	try
-		data = fs.readFileSync stack.source
-
+		data = cdl.highlightFileSync config.root_dir+stack.source, linenos: true
 		data = data.toString().split('\n')
 
-		data[stack.line-1] = data[stack.line-1].cyan;
+		line = data[stack.line-1].split(':')
 
-		data.splice(stack.line,0,(new Array(stack.column+1)).join(' ')+"• ".green.bold+message.red)
+		# we add a background color to the target line
+		data[stack.line-1] = line.shift()+":".gray+line.join('').bgMagenta
 
-		if stack.line <= 5 then min = 1 else min = stack.line - 5
+		# we create a new line after the error to display the message at the same column the error starts
+		data.splice(stack.line,0,(new Array(stack.column+(stack.line+"").length+3)).join(' ')+"• ".green.bold+message.red)
 
-		console.log "\n",stack.source.green+':'+(stack.line+"").gray+':'+stack.functionName.cyan,"\n"
+		# what first line do we want to display ? 
+		# from 5 line before the error, if available
+		if stack.line <= 5 then min = 0 else min = stack.line - 5
+
+		# display the file name, the line, the upper function
+		console.log "\n",stack.source.green+':'+(stack.line+"").gray+':'+(stack.functionName+"").cyan,"\n"
+
+		# display 10 lines of the colored file
+		# @todo display only 5lines after the error. 
+		# If the error occurs into the first 5lines, it will display 6+ lines after the error
 		console.log data.splice(min,10).join('\n')
 
 	catch e 
