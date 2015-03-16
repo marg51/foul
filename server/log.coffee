@@ -22,7 +22,7 @@ displayFile = (stack, message="") ->
 		data[stack.line-1] = line.shift()+":".gray+line.join('').bgMagenta
 
 		# we create a new line after the error to display the message at the same column the error starts
-		data.splice(stack.line,0,(new Array(stack.column+(stack.line+"").length+3)).join(' ')+"• ".green.bold+message.red)
+		data.splice(stack.line,0,(new Array(stack.column+(stack.line+"").length+3)).join(' ')+"^ ".green.bold+message.red)
 
 		# what first line do we want to display ? 
 		# from 5 line before the error, if available
