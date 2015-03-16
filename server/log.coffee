@@ -6,8 +6,9 @@ config = require('./config')
 
 exports.displayFiles = (errors) ->
 
+	console.log errors
 	console.log errors.message.magenta.bgWhite
-	_.map errors.stack, (e, i) ->
+	_.map errors.data.stack, (e, i) ->
 		displayFile(e, (if i is 0 then errors.message else ""))
 
 

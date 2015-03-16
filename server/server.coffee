@@ -3,6 +3,8 @@ _ = require('lodash')
 log = require('./log').displayFiles
 ES = require('./elasticsearch')
 sessionManager = require('./sessionManager')
+errorManager = require('./errorManager')
+CookieParser= require('restify-cookies')
 
 server = restify.createServer
 	name:'Foul'
@@ -11,35 +13,42 @@ server = restify.createServer
 server.use restify.acceptParser(server.acceptable)
 server.use restify.queryParser()
 server.use restify.bodyParser()
+server.use CookieParser.parse
 
 # server.use restify.CORS({origins: ["https://.com","https://www..com"]})
 
 sourcemap = require('./sourcemap')
 
 server.post '/create-session', (req, res, next) ->
-	sessionManager.createSession(req.params).then (data) ->
-		res.send {sessionId: data._id}
+	sessionManager.createSession(req.params, req.cookies).then (data) ->
+		res.setCookie "foulSessionUID", data._id
+		res.send('ok')
 
 	next()
 
 server.post '/identify', (req, res, next) ->
-	sessionManager.updateUserId(req.params.sessionId,req.params.userId)
+	sessionManager.updateUserId(req.cookies.foulSessionUID,req.params.userId)
 	res.send()
 	next()
 
-server.post '/route', (req, res, next) ->
-	routeManager.createRoute(req.params).then (data) ->
-		res.send {routeId: data._id}
+server.post '/create-route', (req, res, next) ->
+	routeManager.createRoute(req.params, req.cookies).then (data) ->
+		res.setCookie "foulLastRouteUID", data._id
+		res.send('ok')
 	next()
 
-server.post '/error', (req, res, next) ->
-	errorManager.createError(req.params).then (data) ->
+server.post '/create-error', (req, res, next) ->
+	errorManager.createError(req.params, req.cookies).then((data) ->
+		res.setCookie "foulLastErrorUID", data._id
 		log(data)
+	).catch((data) ->
+		console.log data
+	).finally ->
+		res.send('ok')
 
-	res.send()
 	next()
 
-server.post '/event', (req, res, next) ->
+server.post '/create-event', (req, res, next) ->
 	eventManager.createEvent(req.params)
 	res.send()
 	next()
