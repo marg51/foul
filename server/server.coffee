@@ -38,7 +38,17 @@ server.post '/errors', (req, res, next) ->
 
 	res.send "ok"
 
+Cors = (req, res, next) ->
+    res.header('Access-Control-Allow-Credentials', true);
+    res.header('Access-Control-Allow-Headers', 'authorizationData, Authorization, Content-Type, Accept-Encoding, Accept-Language');
+    res.header('Access-Control-Allow-Methods', '*');
+    res.header('Access-Control-Allow-Origin', '*');
+
+    return res.send(204);
+
 server.opts '/errors', Cors
+
+
 
 server.listen 3001, ->
 	console.log 'localhost:'+3001
