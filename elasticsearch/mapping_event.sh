@@ -14,11 +14,11 @@ $x/foul/event/_mapping -XPUT -d '{
         "index": "not_analyzed"
       },
       "name": {
-        "type": "long",
+        "type": "string",
         "index": "not_analyzed"
       },
       "type": {
-        "type": "long",
+        "type": "string",
         "index": "not_analyzed"
       },
       "message": {

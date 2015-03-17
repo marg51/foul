@@ -6,10 +6,12 @@ config = require('./config')
 
 exports.displayFiles = (errors) ->
 
-	console.log errors
+	console.log JSON.stringify errors.data.stack
 	console.log errors.message.magenta.bgWhite
 	_.map errors.data.stack, (e, i) ->
-		displayFile(e, (if i is 0 then errors.message else ""))
+		if e.source
+			displayFile(e, (if i is 0 then errors.message else ""))
+		else "# can't find the file".red
 
 
 displayFile = (stack, message="") ->

@@ -4,6 +4,8 @@ log = require('./log').displayFiles
 ES = require('./elasticsearch')
 sessionManager = require('./sessionManager')
 errorManager = require('./errorManager')
+routeManager = require('./routeManager')
+eventManager = require('./eventManager')
 CookieParser= require('restify-cookies')
 
 server = restify.createServer
@@ -40,7 +42,10 @@ server.post '/create-route', (req, res, next) ->
 server.post '/create-error', (req, res, next) ->
 	errorManager.createError(req.params, req.cookies).then((data) ->
 		res.setCookie "foulLastErrorUID", data._id
-		log(data)
+
+		if(data.type is "javascript")
+			log(data)
+
 	).catch((data) ->
 		console.log data
 	).finally ->
@@ -49,8 +54,8 @@ server.post '/create-error', (req, res, next) ->
 	next()
 
 server.post '/create-event', (req, res, next) ->
-	eventManager.createEvent(req.params)
-	res.send()
+	eventManager.createEvent(req.params, req.cookies)
+	res.send("ok")
 	next()
 
 

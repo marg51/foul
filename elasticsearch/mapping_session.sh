@@ -17,7 +17,7 @@ $x/foul/session/_mapping -XPUT -d '{
         "type": "long",
         "index": "not_analyzed"
       },
-      "user_id" : {
+      "userId" : {
         "type" : "long",
         "index": "not_analyzed"
       },
