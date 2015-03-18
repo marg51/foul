@@ -3,7 +3,7 @@
 x="curl http://localhost:9200"
 
 $x/foul/event -XDELETE
-$x/foul/event/_mapping -XPUT -d '{
+$x/foul/event/_mapping -XPOST -d '{
     "properties" : {
       "session_id" : {
         "type" : "string",
@@ -28,6 +28,9 @@ $x/foul/event/_mapping -XPUT -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
-      }      
+      },
+      "_parent": {
+        "type": "session"
+      }  
     }
   }'

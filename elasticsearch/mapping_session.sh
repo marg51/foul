@@ -24,6 +24,6 @@ $x/foul/session/_mapping -XPUT -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
-      }      
+      }
     }
   }'

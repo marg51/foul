@@ -3,7 +3,7 @@
 x="curl http://localhost:9200"
 
 $x/foul/error -XDELETE
-$x/foul/error/_mapping -XPUT -d '{
+$x/foul/error/_mapping -XPOST -d '{
     "properties" : {
       "session_id" : {
         "type" : "string",
@@ -24,6 +24,9 @@ $x/foul/error/_mapping -XPUT -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
-      }      
+      },
+      "_parent": {
+        "type": "session"
+      }    
     }
   }'

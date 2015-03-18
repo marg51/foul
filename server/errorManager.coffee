@@ -1,6 +1,7 @@
 sourcemap = require('./sourcemap')
 _ = require('lodash')
 ES = require('./elasticsearch')
+sanitize = require('./utils').sanitize
 
 exports.createError = (data, cookies) ->
 	errors = {}
@@ -29,5 +30,5 @@ exports.createError = (data, cookies) ->
 
 
 	# return promise
-	ES.post('error', object).then (data) ->
+	ES.post('error?parent='+sanitize(cookies.foulLastErrorUID), object).then (data) ->
 		_.merge(object, data)
