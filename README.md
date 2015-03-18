@@ -11,7 +11,7 @@ It uses elasticsearch and NodeJS/io.js.
 
 ### elasticsearch reports
 
-![image](http://s11.postimg.org/3slbm0iwz/screenshot_foul.png)
+![image](https://s3-eu-west-1.amazonaws.com/uploads-eu.hipchat.com/106644/786095/X36wM0KRMcUwW4A/Screen%20Shot%202015-03-18%20at%2021.46.46.png)
 
 
 ***

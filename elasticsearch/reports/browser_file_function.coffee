@@ -15,9 +15,18 @@ request.post('http://localhost:9200/foul/track/_search', json: {
             "field": "file"
           },
           "aggs": {
-            "function": {
-              "terms": {
-                "field": "functionName"
+            "value": {
+              "top_hits": {
+                "sort": [{
+                  "date": {
+                    "order": "desc"
+                    }
+                  }
+                ]
+                "size" : 2,
+                "_source": {
+                  "include": ["date"]
+                }
               }
             }
           }
@@ -26,11 +35,11 @@ request.post('http://localhost:9200/foul/track/_search', json: {
     }
   }
 }, (err, http, body) -> 
-    # console.log JSON.stringify(body,null,2)
-    _.map body.aggregations.browser.buckets, (e) ->
-        console.log e.key.cyan,"(",(e.doc_count+"").cyan,")"
-        _.map e.file.buckets, (f) ->
-            console.log " •", (f.key+"").magenta,"(",(f.doc_count+"").red,")"
-            _.map f.function.buckets, (g) ->
-                console.log "   ›", (g.key+"").gray,"(",(g.doc_count+"").gray,")"
+    console.log JSON.stringify(body,null,2)
+    # _.map body.aggregations.browser.buckets, (e) ->
+    #     console.log e.key.cyan,"(",(e.doc_count+"").cyan,")"
+    #     _.map e.file.buckets, (f) ->
+    #         console.log " •", (f.key+"").magenta,"(",(f.doc_count+"").red,")"
+    #         _.map f.function.buckets, (g) ->
+    #             console.log "   ›", (g.key+"").gray,"(",(g.doc_count+"").gray,")"
 )
