@@ -10,4 +10,4 @@ exports.createEvent = (data, cookies) ->
     _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID, routeId: cookies.foulLastRouteUID}
 
     # return promsie
-    ES.post('event?parent='+sanitize(cookies.foulLastErrorUID)', object)
+    ES.post('event?parent='+sanitize(cookies.foulLastErrorUID), object)

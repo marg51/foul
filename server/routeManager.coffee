@@ -10,4 +10,4 @@ exports.createRoute = (data, cookies) ->
     _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID}
 
     # return promsie
-    ES.post('route?parent='+sanitize(cookies.foulLastErrorUID)', object)
+    ES.post('route?parent='+sanitize(cookies.foulLastErrorUID), object)
