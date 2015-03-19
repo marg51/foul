@@ -29,7 +29,7 @@ server.post '/errors', (req, res, next) ->
 		file: errors.stack[0].source
 		line: errors.stack[0].line
 		column: errors.stack[0].column
-		message: errors.message
+		message: String(errors.message).substr(0,100)
 		functionName: errors.stack[0].functionName,
 		data: errors
 

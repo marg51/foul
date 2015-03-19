@@ -8,7 +8,8 @@ exports.displayFiles = (errors) ->
 
 	console.log errors.message.magenta.bgWhite
 	_.map errors.stack, (e, i) ->
-		displayFile(e, (if i is 0 then errors.message else ""))
+		if e.source
+			displayFile(e, (if i is 0 then errors.message else ""))
 
 
 displayFile = (stack, message="") ->
