@@ -27,7 +27,10 @@ exports.post = (name, data) ->
 	request.post  {url: "http://localhost:9200/foul/#{name}", json: data}, (err, http, body) ->
 		return handleResponse(resolver, body)
 
-	resolver.promise
+	resolver.promise.catch (data) ->
+       console.log data
+
+       throw new Error(data)
 
 
 exports.get = (name, data) ->

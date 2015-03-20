@@ -14,7 +14,7 @@ $x/foul/route/_mapping -XPOST -d '{
         "index": "not_analyzed"
       },
       "toState": {
-        "type": "long",
+        "type": "string",
         "index": "not_analyzed"
       },
       "time_elapsed" : {
@@ -24,9 +24,9 @@ $x/foul/route/_mapping -XPOST -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
-      },
-      "_parent": {
-        "type": "session"
       }
+    },
+    "_parent": {
+      "type": "session"
     }
   }'

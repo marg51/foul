@@ -28,9 +28,9 @@ $x/foul/event/_mapping -XPOST -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
-      },
-      "_parent": {
-        "type": "session"
-      }  
-    }
+      }
+    },
+    "_parent": {
+      "type": "session"
+    } 
   }'
