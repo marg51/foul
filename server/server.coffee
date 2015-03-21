@@ -46,6 +46,7 @@ server.post '/errors', (req, res, next) ->
     
 
     # persist into elasticsearch
+    console.log JSON.stringify data, null, 4
     ES.save data 
 
     res.send "ok"
