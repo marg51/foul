@@ -19,11 +19,23 @@ displayFile = (stack, message="") ->
 
 		line = data[stack.line-1].split(':')
 
+		# CURSOR ALIGNEMENT
+		# The goal is to place the error exactly where the error occured
+
+		# reuse indent from previous line (both tab and space count as one char …)
+		indent = line[1].match(/^(\s*)/)[0]
+
+		# ie. if the line added by cardinal is 100, we add 3 + 1 chars so that the line number doesn't screw our alignment (+1 because of the colon)
+		line_number_indent = (stack.line+"").length + 1
+
+		# how many chars do we still have to add ?
+		indentBy = stack.column + 3 + line_number_indent - indent.length
+
 		# we add a background color to the target line
-		data[stack.line-1] = line.shift()+":".gray+line.join('').bgMagenta
+		data[stack.line-1] = line.shift()+":".white+line.join('').bgMagenta
 
 		# we create a new line after the error to display the message at the same column the error starts
-		data.splice(stack.line,0,(new Array(stack.column+(stack.line+"").length+3)).join(' ')+"^ ".green.bold+message.red)
+		data.splice(stack.line,0,(indent + new Array(indentBy).join(' ')+"^ ".green.bold+message.red))
 
 		# what first line do we want to display ? 
 		# from 5 line before the error, if available

@@ -2,7 +2,7 @@
 
 x="curl http://localhost:9200"
 
-# $x/foul -XDELETE
+$x/foul -XDELETE
 $x/foul/ -XPUT -d '{
 "mappings": {
   "track" : {
@@ -44,10 +44,6 @@ $x/foul/ -XPUT -d '{
         "index": "not_analyzed"
       },
       "state" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "stateParams" : {
         "type" : "string",
         "index": "not_analyzed"
       },
