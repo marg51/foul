@@ -3,7 +3,7 @@
 x="curl http://localhost:9200"
 
 $x/foul/session -XDELETE
-$x/foul/session/_mapping -XPUT -d '{
+$x/foul/session/_mapping -XPOST -d '{
     "properties" : {
       "appVersion" : {
         "type" : "string",

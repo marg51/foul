@@ -43,7 +43,7 @@ request.post('http://localhost:9200/foul/_search', json: {
             else 
               date = parseInt((g._source.date - a[i-1]._source.date)/1000) + " seconds later"
             if g._type is "error"
-              text = " • [".gray+"ERROR".magenta+"(".gray+g._source.type.cyan+")]".gray
+              text = " • [".gray+"ERROR".magenta+"(".gray+(g._source.type||"").cyan+")]".gray
               if g._source.type is "http"
                 text += (" "+g._source.statusCode+" "+g._source.message).magenta + " "+g._source.url.gray
               else if g._source.type is "javascript"
@@ -51,14 +51,14 @@ request.post('http://localhost:9200/foul/_search', json: {
                   text += " "+g._source.file+':'+g._source.line+'#'+g._source.functionName
             else if g._type is "event"
               if g._source.type is "success"
-                text = " • [".gray+"EVENT".green+"(".gray+g._source.name.cyan+")]".gray
+                text = " • [".gray+"EVENT".green+"(".gray+(g._source.name||"").cyan+")]".gray
               else
-                text = " • [".gray+"EVENT".red+"(".gray+g._source.name.cyan+")]".gray
+                text = " • [".gray+"EVENT".red+"(".gray+(g._source.name||"").cyan+")]".gray
 
               text += " "+(g._source.message||"")
 
             else if g._type is "route"
-              text = "[".gray+"STATECHANGE".green+"(".gray+g._source.toState.cyan+")]".gray
+              text = "[".gray+"STATECHANGE".green+"(".gray+(g._source.toState||"").cyan+")]".gray
               text += " "+JSON.stringify(g._source.toParams)
 
 
@@ -69,4 +69,6 @@ request.post('http://localhost:9200/foul/_search', json: {
             #   console.log " •", (g._source.name+"").green, "new event", date
             # else 
             #   console.log " •", (g._type+"").gray, date
+        if e.doc_count > 10
+          console.log "\t\t####".yellow,e.doc_count - 10, "events not shown","####".yellow
 )

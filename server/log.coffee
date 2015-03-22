@@ -41,4 +41,9 @@ displayFile = (stack, message="") ->
 
 	catch e 
 		console.log e.stack
-		
+
+exports.displayESQuery = (queries...) ->
+	# console.log.apply this, queries
+
+exports.displayHTTPQuery = (queries...) ->
+	# console.log.apply this, queries
