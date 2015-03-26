@@ -15,10 +15,10 @@ exports.createSession = (data, cookies) ->
     ES.post('session', object)
 
 exports.updateUserId = (sessionId, userId) ->
-    exports.getSession(sessionId).then (data) ->
-        data.userId = userId
+    exports.get(sessionId).then (data) ->
+        data._source.userId = userId
 
-        ES.put('session',sessionId,data)
+        exports.update(data)
 
 
 exports.get = (sessionId) ->
@@ -34,6 +34,7 @@ exports.addNested = (sessionId, type, promise) ->
     Promise.all([promise, exports.get(sessionId)]).then (data) ->
         object = data[0]
         session = data[1]
+        session.lastUpdate = Date.now()
 
          # we want the _id into nested session objects
         object._source._id = object._id
