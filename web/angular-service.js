@@ -1,5 +1,6 @@
 var app = angular.module('app');
 
+// app.constant('FOUL_URL', 'http://213.246.45.20:2994/v1/')
 app.constant('FOUL_URL', '/foul/');
 
 
@@ -7,11 +8,11 @@ app.factory('foulEventLogger', function($http, foulManager) {
     return function(name, message, data, type) {
         if(!type) {type="success"}
 
-        return foulManager.post('create-event', _.merge({},data,{name:name, type: type, message:message})); 
+        return foulManager.post('create-event', _.merge({},data,{name:name, type: type, message:message}));
     }
 })
 
-app.factory('foulManager', function($http, FOUL_URL, browserInfo) {
+app.factory('foulManager', function($http, FOUL_URL, browserInfo, $timeout) {
     var $scope = {};
     var instance, queries = [], running;
 
@@ -20,22 +21,50 @@ app.factory('foulManager', function($http, FOUL_URL, browserInfo) {
             return instance;
         }
 
-        instance = $http.post(FOUL_URL+'create-session', 
+        instance = $http.post(FOUL_URL+'create-session',
             _.merge(
                 {},
-                browserInfo, 
+                browserInfo,
                 {
                     appVersion: APP_VER,
                     prod: APP_ENV=="PROD"
                 }
             )
-        )
+        ).then(function() {
+            var attempt_count = 0;
+
+
+            var retryLater = function() {
+                if(performance && performance.timing.loadEventEnd) { return sendStats()}
+
+                if(attempt_count>5){console.log('cant get timing'); return}
+                attempt_count++;
+
+                $timeout(function() {
+                    retryLater()
+                }, attempt_count*1000)
+
+            }
+            var sendStats = function() {
+                // can't copy performance.timing as an object, so let's do it value after value
+                var timing = _.pick(performance.timing,["connectEnd","connectStart","domComplete","domContentLoadedEventEnd","domContentLoadedEventStart","domInteractive","domLoading","domainLookupEnd","domainLookupStart","fetchStart","loadEventEnd","loadEventStart","navigationStart","redirectEnd","redirectStart","requestStart","responseEnd","responseStart","secureConnectionStart","unloadEventEnd","unloadEventStart"]);
+
+                $scope.post('create-timing', {
+                    name: "pageLoad",
+                    type: "browserEvent",
+                    duration: performance.timing.loadEventEnd - performance.timing.navigationStart ,
+                    data: timing
+                })
+            }
+
+            retryLater();
+
+        })
 
         return instance;
     }
 
     $scope.post = function(name, data) {
-        console.log("post")
         $scope.getSession().then(function() {
 
             var query = function() {
@@ -72,18 +101,29 @@ app.run(function($http, $rootScope, $state, $stateParams, foulManager, browserIn
     var event_number = 0;
 
     $rootScope.$on('user::loggedIn', function(event, User) {
+        foulManager.post('identify', {
+            userId: User.user.userID
+        });
         foulEventLogger("login", null, {userId: User.user.userID});
     });
 
     var session = foulManager.getSession()
-        
+
+    var lastEventTime;
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams) {
+        lastEventTime = performance.now()
         session.then(function() {
             foulManager.post('create-route', {
                 toState: toState.name,
                 toParams: toParams
             });
         })
+    });
+
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
+        if(angular.isFunction(performance.now)) {
+            foulManager.post('create-timing', {name: toState.name, type: "state", duration: performance.now()-lastEventTime})
+        }
     });
 
     $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
@@ -95,14 +135,14 @@ app.run(function($http, $rootScope, $state, $stateParams, foulManager, browserIn
                 message: error
             });
         })
-        
+
     });
 
 });
 
 // log errors into Foul for easy debug
 // Only on prod and for Chrome users right now
-    
+
 app.config(function ($provide, $httpProvider) {
     $httpProvider.interceptors.push('foulHttpInterceptor');
     $provide.decorator("$exceptionHandler", function ($delegate, $injector, parseExceptionService) {
@@ -132,6 +172,31 @@ app.config(function ($provide, $httpProvider) {
 
 app.factory('foulHttpInterceptor', function($q, $injector) {
     return {
+        // be careful, it could end up with an infinite loop if the timing query is caught
+        request: function(config) {
+            if(config.url.match(/^\/api/)) {
+                if(angular.isFunction(performance.now)) {
+                    config._date = performance.now();
+                }
+            }
+
+            return config
+        },
+        response: function(data) {
+            if(data.config._date) {
+                var duration=performance.now() - data.config._date;
+                $injector.get('foulManager').post('create-timing', {
+                    type: 'http',
+                    name: data.config.url.replace(/\/[0-9]+/g,'/:id'),
+                    url: data.config.url,
+                    status: data.status,
+                    method: data.config.method,
+                    duration: duration
+                })
+            }
+
+            return data;
+        },
         responseError: function(data) {
             if(!data.config.url.match(/foul/)) {
                 console.log(data)
@@ -145,7 +210,8 @@ app.factory('foulHttpInterceptor', function($q, $injector) {
             }
 
             return $q.reject(data);
-        }
+        },
+
     }
 });
 
@@ -271,7 +337,7 @@ app.factory('parseExceptionService', function() {
 // http://stackoverflow.com/questions/5916900/how-can-you-detect-the-version-of-a-browser
 app.factory('browserInfo', function() {
     var sayswho= (function(){
-        var ua= navigator.userAgent, tem, 
+        var ua= navigator.userAgent, tem,
         M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
         if(/trident/i.test(M[1])){
             tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];

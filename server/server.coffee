@@ -6,6 +6,7 @@ sessionManager = require('./sessionManager')
 errorManager = require('./errorManager')
 routeManager = require('./routeManager')
 eventManager = require('./eventManager')
+timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
 require('colors')
 
@@ -70,6 +71,15 @@ server.post '/create-error', (req, res, next) ->
 server.post '/create-event', (req, res, next) ->
     log.displayHTTPQuery "[CREATE EVENT]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
     eventManager.createEvent(req.params, req.cookies).then(()->
+        res.send(200)
+    ).catch(()->
+        res.send(204)
+    )
+    next()
+
+server.post '/create-timing', (req, res, next) ->
+    log.displayHTTPQuery "[CREATE TIMING]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
+    timingManager.createTiming(req.params, req.cookies).then(()->
         res.send(200)
     ).catch(()->
         res.send(204)

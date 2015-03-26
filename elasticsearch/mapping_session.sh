@@ -24,6 +24,11 @@ $x/foul/session/_mapping -XPOST -d '{
       "date": {
         "type": "date",
         "format": "dateTime"
+      },
+      "last_update": {
+        "type": "date",
+        "format": "dateTime"
       }
+
     }
   }'

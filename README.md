@@ -18,12 +18,12 @@ It uses elasticsearch and NodeJS/io.js.
 ## API
 
 #### POST /create-session
-        
-> - a new session should be created before anything else. 
-- A cookie `foulSessionUID` is sent to the requester and others queries should send this cookie back. 
+
+> - a new session should be created before anything else.
+- A cookie `foulSessionUID` is sent to the requester and others queries should send this cookie back.
 - Every `event`, `route`, `error` will be attached to this session.
 - On a single page app, a new session could be created at page load (a user can have several sessions)
-    
+
 - `browser:String` name of browser, ie. _Firefox_
 - `browserVersion:Number` version of browser, ie. _38_
 - `appVersion:String` version of your app, could be a git hash.
@@ -48,7 +48,7 @@ curl -XPOST http://localhost:3001/create-session -d '
 
 #### POST /create-route
 
-> 
+>
   - a new route should be created when the user change the page, or change of state (SPA)
   - it is linked to the previously created session (via cookie)
   - it can be linked to the previous route (via cookie)
@@ -108,7 +108,18 @@ The stack trace must be sent in a normalised way. Only Chrome is supported right
   - Errors are linked to a session via cookie
   - we can specify a stack trace, so that we can find the exact file where the error occured
   - we could link to a route via cookie
-  
+
+
+#### POST /create-timing
+
+>
+- a timing can report any duration an event took — from a http query to how long the user took to fill in the form
+
+- `name:String` name of the event. Could be an URL, or the name of a form, etc.
+- `type:String` what category is it. Could be HTTP, route, user interaction, etc.
+- `message:String` a humanised name + string. ie "loading of the page http://example.com/api/"
+- `duration:Integer` time elapsed in **ms**.
+
 
 
 
