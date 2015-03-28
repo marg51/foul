@@ -8,7 +8,9 @@ routeManager = require('./routeManager')
 eventManager = require('./eventManager')
 timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
+
 require('colors')
+
 
 server = restify.createServer
     name:'Foul'
@@ -19,13 +21,16 @@ server.use restify.queryParser()
 server.use restify.bodyParser()
 server.use CookieParser.parse
 
+
+
+
 # server.use restify.CORS({origins: ["https://.com","https://www..com"]})
 
 sourcemap = require('./sourcemap')
 
 server.post '/create-session', (req, res, next) ->
     log.displayHTTPQuery "[CREATE SESSION]\t".green
-    sessionManager.createSession(req.params, req.cookies).then((data) ->
+    sessionManager.createSession(req.params, req.cookies, req.headers).then((data) ->
         res.setCookie "foulSessionUID", data._id
         res.send(200)
     ).catch(()->

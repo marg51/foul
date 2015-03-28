@@ -147,23 +147,39 @@ The stack trace must be sent in a normalised way. Only Chrome is supported right
 
 Core i7, 2.5Ghz
 
-`ab -c 10 -n 100 -p /tmp/post.data -H "Cookie: foulLastRouteUID=AUxBg1tn7d1kE33QCVgx; foulSessionUID=AUxBiHf57d1kE33QCVg1; foulLastErrorUID=AUxBiHf57d1kE33QCVg1;" http://127.0.0.1:3001/create-route`
+`ab -c 10 -n 100 -p /tmp/post.data -H "Cookie: foulLastRouteUID=AUxBg1tn7d1kE33QCVgx; foulSessionUID=AUxhaEB-7d1kE33QCVyJ; foulLastErrorUID=AUxBiHf57d1kE33QCVg1;" http://127.0.0.1:3001/create-route`
 
 
 ```javascript
 Concurrency Level:      10
-Time taken for tests:   0.480 seconds
+Time taken for tests:   0.329 seconds
 Complete requests:      100
 Failed requests:        0
 Total transferred:      12600 bytes
-Total body sent:        29800
+Total body sent:        30200
 HTML transferred:       0 bytes
-Requests per second:    208.48 [#/sec] (mean)
-Time per request:       47.966 [ms] (mean)
-Time per request:       4.797 [ms] (mean, across all concurrent requests)
-Transfer rate:          25.65 [Kbytes/sec] received
-                        60.67 kb/s sent
-                        86.32 kb/s total
+Requests per second:    303.73 [#/sec] (mean)
+Time per request:       32.924 [ms] (mean)
+Time per request:       3.292 [ms] (mean, across all concurrent requests)
+Transfer rate:          37.37 [Kbytes/sec] received
+                        89.58 kb/s sent
+                        126.95 kb/s total
 ```
 
 This is extremely slow but it makes sense, I'm using a new Request for every transaction with elasticsearch. Using official elasticsearch package should improve our perfs.
+EDIT: It was ~200, it's now 300. I changed too many things to understand why.
+
+## Credits
+
+Thanks to :
+- NodeJS' & elasticsearch' communities
+- https://github.com/bluesmoon/node-geoip
+- https://github.com/3rd-Eden/useragent
+- https://github.com/petkaantonov/bluebird
+- https://github.com/Marak/colors.js
+- https://github.com/lodash/lodash
+- https://github.com/mcavage/node-restify
+- https://github.com/mozilla/source-map/
+- https://github.com/thlorenz/cardinal
+- https://github.com/request/request
+- https://github.com/mbostock/d3
