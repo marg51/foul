@@ -1,15 +1,33 @@
 # Foul, JavaScript tracker
 
-This is a Proof of Concept.
+[![](http://www.commitstrip.com/wp-content/uploads/2015/03/Strip-Debug-mail-650-finalenglish1.jpg)](http://www.commitstrip.com/en/2015/03/23/brace-yourself-debug-is-coming/)
 
-Tracking errors only work with Chrome so far.
+Event tracker.
 
-It uses elasticsearch and NodeJS/io.js.
+ - errors (http queries, javascript errors)
+ - pages tracking
+ - events tracking
+ - timing tracking
 
 
 ### Realtime terminal logs
 
-![image](http://s13.postimg.org/jbhsyjl47/Screen_Shot_2015_03_13_at_14_54_10.png)
+
+Example of use : Timing API
+
+```
+http -- time elapsed (average) for every API endpoints
+ • /api/users/me ( 2 events ) 424ms
+ • /api/users/:id/counters ( 2 events ) 1071ms
+ • /api/users/:id/messages ( 2 events ) 1895.5ms
+ • /api/users/:id/pets ( 2 events ) 2329ms
+state -- time elapsed (average) for each state transition (single page application)
+ • conversations ( 1 events ) 8ms
+ • home ( 2 events ) 424.5ms
+browserEvent -- time elapsed (average) for the page to be fully loaded
+ • pageLoad ( 2 events ) 12371ms
+ ```
+
 
 ### elasticsearch reports
 
