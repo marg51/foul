@@ -11,10 +11,7 @@ request.post('http://localhost:9200/foul/session/_search', json: {
       }
     }
   }
-}, (err, http, body) -> 
-    console.log JSON.stringify(body)
+}, (err, http, body) ->
     _.map body.aggregations.value.buckets, (e) ->
-        console.log (moment(e.key).format("MMMM Do, HH:mm:ss")+"").cyan,"(",(e.doc_count+"").red,")"
-
-
+        console.log ("UserId: " + e.key).cyan, "( "+ (e.doc_count+"").magenta, "sessions )"
 )

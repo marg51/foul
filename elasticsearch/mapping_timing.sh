@@ -30,8 +30,7 @@ $x/foul/timing/_mapping -XPOST -d '{
       "format": "dateTime"
     },
     "duration": {
-      "type": "date",
-      "format": "time"
+      "type": "long"
     }
   }
 }'

@@ -14,12 +14,12 @@ request.post('http://localhost:9200/foul/timing/_search', json: {
             "terms": {
                 "field": "name",
                 "order": {
-                    "value": "asc"
+                    "value.25": "asc"
                 }
             },
             "aggs": {
                 "value": {
-                    "avg": {
+                    "percentiles": {
                         "field": "duration"
                     }
                 }
@@ -33,5 +33,8 @@ request.post('http://localhost:9200/foul/timing/_search', json: {
     _.map body.aggregations.value.buckets, (e) ->
         console.log e.key.magenta
         _.map e.value.buckets, (f) ->
-            console.log " •".gray, f.key.cyan, ("( "+f.doc_count+" events )").gray, (Math.ceil(f.value.value*100)/100+"").yellow+"ms"
+            console.log " •".gray, f.key.cyan, ("( "+f.doc_count+" events )").gray
+            _.forEach f.value.values, (e, i) ->
+                console.log "    -".gray, (i+"%").green, (e+"").yellow+"ms"
+
 )
