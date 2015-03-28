@@ -9,26 +9,128 @@ $x/foul/session/_mapping -XPOST -d '{
         "type" : "string",
         "index": "not_analyzed"
       },
-      "browser" : {
-        "type" : "string",
+      "user" : {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type" : "long",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "location": {
+        "type" : "geo_point"
+      },
+      "city": {
+        "type": "string",
         "index": "not_analyzed"
       },
-      "browserVersion": {
-        "type": "long",
+      "country": {
+        "type": "string",
         "index": "not_analyzed"
       },
-      "userId" : {
-        "type" : "long",
+      "region": {
+        "type": "string",
         "index": "not_analyzed"
+      },
+      "browser": {
+        "type": "nested",
+        "properties": {
+          "family": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "version": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "device": {
+        "type": "nested",
+        "properties": {
+          "family": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "version": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "os": {
+        "type": "nested",
+        "properties": {
+          "family": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "version": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "timings": {
+        "type": "nested",
+        "properties": {
+          "type": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "routes": {
+        "type": "nested",
+        "properties": {
+          "type": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "errors": {
+        "type": "nested",
+        "properties": {
+          "type": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      "events": {
+        "type": "nested",
+        "properties": {
+          "type": {
+            "type": "string",
+            "index": "not_analyzed"
+          },
+          "name": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
       },
       "date": {
         "type": "date",
         "format": "dateTime"
       },
-      "last_update": {
+      "updatedAt": {
         "type": "date",
         "format": "dateTime"
       }
-
     }
   }'
