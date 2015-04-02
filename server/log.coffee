@@ -30,14 +30,19 @@ displayFile = (stack, message="") ->
 
 		# how many chars do we still have to add ?
 		indentBy = stack.column + 3 + line_number_indent - indent.length
+		if indentBy < 0
+			indentBy = 1
 
+		console.log stack.column,line_number_indent,indent.length
 		# we add a background color to the target line
 		data[stack.line-1] = line.shift()+":".white+line.join('').bgMagenta
+
+		console.log(indentBy, line_number_indent, indent)
 
 		# we create a new line after the error to display the message at the same column the error starts
 		data.splice(stack.line,0,(indent + new Array(indentBy).join(' ')+"^ ".green.bold+message.red))
 
-		# what first line do we want to display ? 
+		# what first line do we want to display ?
 		# from 5 line before the error, if available
 		if stack.line <= 5 then min = 0 else min = stack.line - 5
 
@@ -45,10 +50,10 @@ displayFile = (stack, message="") ->
 		console.log "\n",stack.source.green+':'+(stack.line+"").gray+':'+(stack.functionName+"").cyan,"\n"
 
 		# display 10 lines of the colored file
-		# @todo display only 5lines after the error. 
+		# @todo display only 5lines after the error.
 		# If the error occurs into the first 5lines, it will display 6+ lines after the error
 		console.log data.splice(min,10).join('\n')
 
-	catch e 
+	catch e
 		console.log e.stack
-		
+
