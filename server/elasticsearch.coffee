@@ -18,14 +18,14 @@ log = require('./log')
 
 
 handleResponse = (resolver, body) ->
-    if(body.status is 400) 
+    if !body._type
+        body = JSON.parse(body)
+
+    if(body.status is 400)
         resolver.reject(body)
     else if body.found is false
         resolver.reject(body)
     else
-        if !body._type 
-            body = JSON.parse(body)
-
         log.displayESQuery '[RESOLVED]\t'.magenta,body._type,body._id,"\n"
         resolver.resolve(body)
 
@@ -54,7 +54,9 @@ exports.get = (name, id) ->
 
        throw new Error(data)
 
-
+# @todo need to update the contract
+# instead of sending name + id + object._source everytime, we could send directly object and use _id, _type, _source to update accordingly
+# -> refactor
 exports.put = (name, id, data) ->
     resolver = Promise.pending()
 

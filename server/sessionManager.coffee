@@ -36,8 +36,6 @@ exports.createSession = (data, cookies, headers) ->
 
     _.merge object, data, {date: Date.now(), previousSessionId: cookies.foulSessionUID}, myip, agent
 
-    console.log JSON.stringify object, null, 4
-
     # return promsie
     ES.post('session', object)
 
@@ -67,11 +65,8 @@ exports.addNested = (sessionId, type, promise) ->
          # we want the _id into nested session objects
         object._source._id = object._id
 
-
         if !session._source[type]
             session._source[type] = []
-
-
 
         session._source[type].push object._source
 

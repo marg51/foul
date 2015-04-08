@@ -50,10 +50,11 @@ server.post '/identify', (req, res, next) ->
 server.post '/create-route', (req, res, next) ->
     log.displayHTTPQuery "[CREATE ROUTE]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
     routeManager.createRoute(req.params, req.cookies).then((data) ->
+        console.log data
         res.setCookie "foulLastRouteUID", data._id
         res.send(200)
     ).catch((data) ->
-        console.log "Can't save route".magenta, req.params, req.cookies
+        console.log "Can't save route".magenta, data.stack
         res.send(204)
     )
     next()
