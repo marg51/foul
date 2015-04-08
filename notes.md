@@ -8,21 +8,25 @@ It's killing me to say so, but when trying to get the pages with the biggest dro
 
 [We can do it](https://github.com/marg51/foul/blob/a04a86e/elasticsearch/reports/bounce_after_event.coffee), but it's really not optimised and you can't extend it.
 
-What I've done:
+##### What I've done:
 
 - aggregate per sessionId, so that I have buckets of routes of the same session
 - take the last route of each buckets ( = last route of every session )
 - with this result, I count the number of occurences of every state with node
 
+##### What can we do ?
+
 I tried to update my server, so that every route has a `nextRouteId`. Now, I can filter (instead of aggregating) the latest routes of every session. [Here is the new script](https://github.com/marg51/foul/blob/a047aa4/elasticsearch/reports/bounce_after_event.coffee)
 
 It gives the same result, but there is a big difference: we can extend it. We can add any aggregation on top of it, add filters…
 
-So, what's the problem ?
+##### So, what's the problem ?
 
-** I had to update my server ** for this specific use case. It does work, ok, but what if I want the latest two states ? I will need to update my server again.
+**I had to update my server** for this specific use case. It does work, ok, but what if I want the latest two states ? I will need to update my server again.
 
 I need simplicity, and it isn't what I have right now.
+
+##### Redis
 
 I wonder if using elasticsearch and redis could help. Using the power of retrieving documents with redis and the power of search of elasticsearch sound powerful. I'll have to think about it.
 
