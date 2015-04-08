@@ -4,6 +4,25 @@ require('colors')
 moment = require('moment')
 
 request.post('http://localhost:9200/foul/session/_search', json: {
+  "query": {
+    "filtered" : {
+      "query" : { "match_all" : {} },
+      "filter" : {
+        "nested" : {
+          "path" : "timings",
+          "filter" : {
+              "bool" : {
+                  "must" : [
+                      {
+                          "term" : {"timings.type" : "browserEvent"}
+                      }
+                  ]
+              }
+          }
+        }
+      }
+    }
+  },
   "aggs": {
     "value": {
       "nested": {
