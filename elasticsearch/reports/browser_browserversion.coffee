@@ -129,7 +129,7 @@ request.post('http://localhost:9200/foul/session/_search', json: {
     }
   }
 }, (err, http, body) ->
-    console.log JSON.stringify(body,null,2)
+    return console.log JSON.stringify(body.took,null,2)
     _.map body.aggregations.value.value.buckets, (e) ->
         console.log e.key.cyan,"(",(e.doc_count+"").cyan,")"
         _.map e.value.value.value.buckets, (f) ->

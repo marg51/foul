@@ -1,4 +1,5 @@
-home#messages#message#message#home#leave,1
-home#profiles_edit#home#account.details#home#leave,1
-home#messages#bookings#home#leave,1
-home#leave,2
+home#messages#joining,2
+messages#home#joining,2
+home#message#message#messages#home#bookings#home#messages#demo#joining,1
+home#messages#home#joining,1
+messages#joining,1

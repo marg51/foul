@@ -31,7 +31,7 @@ browserEvent -- time elapsed (average) for the page to be fully loaded
 
 ### elasticsearch reports
 
-![image](https://s3-eu-west-1.amazonaws.com/uploads-eu.hipchat.com/106644/786095/X36wM0KRMcUwW4A/Screen%20Shot%202015-03-18%20at%2021.46.46.png)
+![image](http://s21.postimg.org/7hyl5we1j/Screen_Shot_2015_04_12_at_12_14_03.png)
 
 ## API
 

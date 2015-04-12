@@ -5,13 +5,6 @@ moment = require('moment')
 
 # http://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-top-hits-aggregation.html
 request.post('http://localhost:9200/foul/_search', json: {
-  "query": {
-    "range": {
-      "date": {
-        "gte": "now-1h"
-      }
-    }
-  },
   "aggs": {
     "value": {
       "terms": {
@@ -33,14 +26,14 @@ request.post('http://localhost:9200/foul/_search', json: {
     }
   },
   "size": 30
-}, (err, http, body) -> 
+}, (err, http, body) ->
     console.log JSON.stringify(body,null,2)
     _.map body.aggregations.value.buckets, (e) ->
         console.log "\n",e.key.blue,"( ",(e.doc_count+" events").gray,")"
         _.map e.value.hits.hits, (g, i, a) ->
             if i is 0
               date = moment(g._source.date).format("MMMM Do, HH:mm:ss")
-            else 
+            else
               date = parseInt((g._source.date - a[i-1]._source.date)/1000) + " seconds later"
             if g._type is "error"
               text = " • [".gray+"ERROR".magenta+"(".gray+(g._source.type||"").cyan+")]".gray
@@ -67,7 +60,7 @@ request.post('http://localhost:9200/foul/_search', json: {
             #   console.log " •", "["+g._source.toState.gray+"]", "change to new state", date
             # else if g._type is "event"
             #   console.log " •", (g._source.name+"").green, "new event", date
-            # else 
+            # else
             #   console.log " •", (g._type+"").gray, date
         if e.doc_count > 10
           console.log "\t\t####".yellow,e.doc_count - 10, "events not shown","####".yellow
