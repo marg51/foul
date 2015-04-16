@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Sequences sunburst</title>
+    <script src="bower_components/d3/d3.js"></script>
+    <script src="bower_components/lodash/lodash.min.js"></script>
+    <style type="text/css">.bar {background:red;display:inline-block;margin:2px;width:10px;}</style>
+  </head>
+  <body>
+    <style type="text/css">
+
+        body {
+            padding-top: 20px;
+            padding-left: 15px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #chartArea {
+            width: 500px;
+            height: 400px;
+            background-color: #CCC;
+        }
+
+        .dot {
+            fill: teal;
+            fill-opacity: 0.7;
+            stroke: black;
+        }
+
+        .active {
+            fill: magenta;
+            fill-opacity: 0.5;
+            stroke-width: 3px;
+        }
+
+        .axis path, .axis line {
+            fill: none;
+            stroke: #000;
+            stroke-width: 1px;
+            shape-rendering: crispEdges;
+        }
+
+    </style>
+<div id="chartArea"></div>
+<button onclick="add(true)">Update</button>
+<button onclick="update(true)">Update</button>
+<script type="text/javascript">
+
+    
+
+    var margin = {top: 20, right: 10, bottom: 60, left: 60};
+      var w = 500 - margin.left - margin.right,
+          h = 400 - margin.top - margin.bottom;
+
+      var svg = d3.select('#chartArea').append('svg')
+          .attr('width', w + margin.left + margin.right)
+          .attr('height', h + margin.top + margin.bottom)
+          .append('g')
+          .attr('transform', 'translate(' + margin.left + ', ' + margin.top + ')');
+
+      var xScale = d3.scale.linear()
+          .domain([0, 60])
+          .range([0, w]);
+
+      var xAxis = d3.svg.axis()
+          .scale(xScale)
+          .orient('bottom');
+
+      svg.append('g')
+          .attr('class', 'x axis')
+          .attr('transform', 'translate(0, '+ (h + 0) + ')')
+          .call(xAxis);
+
+      var yScale = d3.scale.linear()
+          .domain([0, 100])
+          .range([h, 0]);
+
+
+    var dataset = _.map(_.range(25), function (i) {
+          return {
+              x: Math.round(Math.random() * 100),
+              y: Math.round(Math.random() * 100),
+              r: Math.round(5 + Math.random() * 10)
+          };
+      });
+
+    var y;
+
+    function draw(refresh) {
+      var yScale = d3.scale.linear()
+          .domain([0, d3.max(dataset,function(e){return e.y})])
+          .range([h, 0]);
+
+      y = svg.selectAll('rect')
+          .data(dataset)
+
+        if(!refresh)
+          y = y.enter().append('rect');
+
+        y.transition()
+          .duration(500)
+          .attr('class', 'dot')
+          .attr('x', function (d, i) {
+              return w-((dataset.length - i)*24)+"px";
+          })
+          .attr('y', function (d) {
+              return h - yScale(d.y);
+          })
+          .attr('height', function (d) {
+              return yScale(d.y);
+          })
+          .attr('width', function(d, i) {
+            return "20px";
+          })
+          ;
+    }
+
+    function add() {
+      dataset.push({
+              x: Math.round(Math.random() * 100),
+              y: 100,
+              r: Math.round(5 + Math.random() * 10)
+          });
+
+      draw(true);
+
+      svg.selectAll('rect')
+          .data(dataset).enter().append('rect').transition()
+          .attr('class', 'dot')
+          .duration(500)
+          .delay(500)
+          .attr('x', function (d, i) {
+              return w-((dataset.length - i)*24)+"px";
+          })
+          .attr('y', function (d) {
+              return h - yScale(d.y);
+          })
+          .attr('height', function (d) {
+              return yScale(d.y);
+          })
+          .attr('width', function(d, i) {
+            return "20px";
+          })
+    }
+
+    function update() {
+      dataset[dataset.length-1].y-=5;
+      draw(true);
+    }
+
+    draw()
+
+</script>
+  </body>
+</html>

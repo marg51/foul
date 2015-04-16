@@ -31,3 +31,9 @@ I need simplicity, and it isn't what I have right now.
 I wonder if using elasticsearch and redis could help. Using the power of retrieving documents with redis and the power of search of elasticsearch sound powerful. I'll have to think about it.
 
 
+### link
+
+https://keen.io/blog/47823687779/how-to-do-a-retention-analysis/
+https://keen.io/blog/43990368571/how-to-run-a-weekly-cohort-analysis/
+https://cohortanalysis.com
+

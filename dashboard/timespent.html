@@ -51,8 +51,8 @@ var yAxis = d3.svg.axis().scale(y)
 // Define the line
 var valueline = d3.svg.line()
     .interpolate("basis")
-    .x(function(d) { console.log(d);return x(d.time); })
-    .y(function(d) { return y(+d.signin); });
+    .x(function(d) { console.log(d);return x(d.x); })
+    .y(function(d) { return y(+d.y); });
 
 // Adds the svg canvas
 var svg = d3.select("body")
@@ -63,11 +63,11 @@ var svg = d3.select("body")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 // Get the data
-d3.json("data.csv", function(error, data) {
+d3.json("timespent.json", function(error, data) {
 
     // Scale the range of the data
-    x.domain([0, 10]);
-    y.domain([0, 100]);
+    x.domain([0, 100]);
+    y.domain([0, 300]);
 
     data.forEach(function(e, i) {
         // Add the valueline path.

@@ -4,6 +4,16 @@ require('colors')
 moment = require('moment')
 
 request.post('http://localhost:9200/foul/session/_search', json: {
+  query:
+    filtered:
+      filter:
+        nested:
+          path: "events"
+          filter:
+            bool:
+              must:
+                term:
+                  "events.name": "sigin"
   aggs:
     value:
       date_histogram:
@@ -26,7 +36,7 @@ request.post('http://localhost:9200/foul/session/_search', json: {
 
 
 }, (err, data) ->
-    # console.log JSON.stringify data.body.aggregations
+    console.log JSON.stringify data.body.aggregations
 
     result = []
     _.map data.body.aggregations.value.buckets, (f) ->
