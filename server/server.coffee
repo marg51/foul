@@ -8,6 +8,7 @@ routeManager = require('./routeManager')
 eventManager = require('./eventManager')
 timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
+async = require('async');
 
 require('colors')
 
@@ -28,7 +29,9 @@ server.use CookieParser.parse
 
 sourcemap = require('./sourcemap')
 
-server.post '/create-session', (req, res, next) ->
+
+
+createSessionFn = (req, res, next) ->
     log.displayHTTPQuery "[CREATE SESSION]\t".green
     sessionManager.createSession(req.params, req.cookies, req.headers).then((data) ->
         res.setCookie "foulSessionUID", data._id
@@ -38,56 +41,115 @@ server.post '/create-session', (req, res, next) ->
     )
 
     next()
+server.post '/create-session', createSessionFn
 
-server.post '/identify', (req, res, next) ->
+
+
+identifyFn = (req, res, session, callback) ->
     sessionManager.updateUserId(req.cookies.foulSessionUID,req.params.userId).then(() ->
-        res.send(200)
+        callback(null, {success: true})
     ).catch(()->
-        res.send(204)
+        callback(null, {success: false});
     )
     next()
 
-server.post '/create-route', (req, res, next) ->
-    log.displayHTTPQuery "[CREATE ROUTE]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
+
+createRouteFn = (req, res, session, callback) ->
+    log.displayHTTPQuery "[CREATE ROUTE]\t".cyan, "session", session._id.gray
+
     routeManager.createRoute(req.params, req.cookies).then((data) ->
-        res.setCookie "foulLastRouteUID", data._id
-        res.send(200)
+        console.log data._id, data._type
+        sessionManager.push(session, 'routes', data);
+
+        callback(null, {sucess: true, data: id: data._id})
     ).catch((data) ->
         console.log "Can't save route".magenta, data.stack
-        res.send(204)
+        callback(null, {success: false, message: "can't save route"});
     )
-    next()
 
-server.post '/create-error', (req, res, next) ->
-    log.displayHTTPQuery "[CREATE ERROR]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
+
+createErrorFn = (req, res, session, callback) ->
+    log.displayHTTPQuery "[CREATE ERROR]\t".cyan, "session", session._id.gray
+
     errorManager.createError(req.params, req.cookies).then((data) ->
-        res.setCookie "foulLastErrorUID", data._id
-        res.send 200
+        console.log data._id, data._type
+        sessionManager.push(session, 'errors', data);
+
+        callback(null, {success: true})
 
         if(data.type is "javascript")
             log.displayFiles(data)
 
     ).catch((data) ->
         console.log data.stack
-        res.send 204
+        callback(null, {success: false});
     )
 
-server.post '/create-event', (req, res, next) ->
-    log.displayHTTPQuery "[CREATE EVENT]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
-    eventManager.createEvent(req.params, req.cookies).then(()->
-        res.send(200)
-    ).catch(()->
-        res.send(204)
-    )
-    next()
 
-server.post '/create-timing', (req, res, next) ->
-    log.displayHTTPQuery "[CREATE TIMING]\t".cyan, "session",(req.cookies.foulSessionUID||"").gray
-    timingManager.createTiming(req.params, req.cookies).then(()->
-        res.send(200)
+createEventFn = (req, res, session, callback) ->
+    log.displayHTTPQuery "[CREATE EVENT]\t".cyan, "session", session._id.gray
+
+    eventManager.createEvent(req.params, req.cookies).then((data)->
+        console.log data._id, data._type
+        sessionManager.push(session, 'events', data)
+
+        callback(null, {success: true})
     ).catch(()->
-        res.send(204)
+        callback(null, {success: false});
     )
+
+createTimingFn = (req, res, session, callback) ->
+    log.displayHTTPQuery "[CREATE TIMING]\t".cyan, "session", session._id.gray
+
+    timingManager.createTiming(req.params, req.cookies).then((data)->
+        console.log data._id, data._type
+        sessionManager.push(session, 'timing', data);
+
+        callback(null, {success: true})
+    ).catch(()->
+        callback(null, {success: false});
+    )
+
+
+server.post '/bulk', (req, res, next) ->
+    sessionManager.get(req.cookies.foulSessionUID).then((session) ->
+        promises = _.map req.params, (query) ->
+            # @todo frontend side
+            query.data.time = query.time
+
+            if(query.name is 'route')
+                fn = createRouteFn
+            else if(query.name is 'error')
+                fn = createErrorFn
+            else if(query.name is 'event')
+                fn = createEventFn
+            else if(query.name is 'timing')
+                fn = createTimingFn
+            else if(query.name is 'identify')
+                fn = identifyFn
+            else
+                console.log query.name
+                fn = (a,b,c,d,callback) ->
+                    callback(null, {success:false, message: query.name+" doesn't exist"});
+
+            return (callback) ->
+                fn({params: query.data, cookies: req.cookies}, res, session, callback)
+
+        async.parallel promises, (err, results) ->
+            if err
+                console.log "err", err
+                return res.send 500
+
+            result = []
+            _.map results, (e, i) ->
+                result.push(_.merge({name: req.params[i].name}, e))
+
+            sessionManager.update(session).then ->
+                res.send({result: result});
+    ).catch ->
+        res.send(404, "session not found")
+
+
     next()
 
 

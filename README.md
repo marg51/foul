@@ -50,8 +50,6 @@ browserEvent -- time elapsed (average) for the page to be fully loaded
 ```bash
 curl -XPOST http://localhost:3001/create-session -d '
 {
-  "browser": "Chrome",
-  "browserVersion": "43",
   "appVersion": "1.7.4",
   "prod": false
 }'
@@ -63,72 +61,90 @@ curl -XPOST http://localhost:3001/create-session -d '
 # Transfer-Encoding: chunked
 ```
 
+#### POST /bulk
 
-#### POST /create-route
+> be careful, the client should have the cookie from `/create-session` before doing any bulk query. It will either fail to save, either attach to a previous session if the cookie is set but outdated.
 
->
-  - a new route should be created when the user change the page, or change of state (SPA)
-  - it is linked to the previously created session (via cookie)
-  - it can be linked to the previous route (via cookie)
-  - it creates a new cookie `foulLastRouteUID` that could be used to link event together
+Send an array of queries.
+
+```json
+curl -XPOST 'http://localhost:3001/bulk' -H 'Cookie: foulLastErrorUID=AUzbnOm5iK_-ftvT9JT1;' --data-binary '[
+  {
+    "name": "route",
+    "data": {
+      "toState": "demo",
+      "toParams": {}
+    },
+    "time": 156.06499999557855
+  },
+  {
+    "name": "timing",
+    "data": {
+      "name": "demo",
+      "type": "state",
+      "duration": 68.56900000275346
+    },
+    "time": 224.65899999951944
+  },
+  {
+    "name": "error",
+    "data": {
+      "type": "http",
+      "url": "somefailedurl",
+      "method": "GET",
+      "statusCode": 404,
+      "message": "Not Found"
+    },
+    "time": 242.10499999753665
+  },
+  {
+    "name": "event",
+    "data": {
+      "type": "success",
+      "name": "login",
+      "message": "user clicked the main button on homepage"
+    },
+    "time": 262.15
+  }
+]'```
+
+Queries can be either `route`, `timing`, `error` or `event`.
+
+##### route
+
+Everytime a new page/state is reached
 
 - `toState:String` name of the new route/state
 - `toParams:Object` list of params for this route/state
 
-```bash
-curl -XPOST http://localhost:3001/create-route -H "Cookie: foulSessionUID=AUxCwMOJ7d1kE33QCVmW" -d '
-{
-  "toState": "demo",
-  "toParams": {}
-}'
 
-# HTTP/1.1 200 OK
-# Set-Cookie: foulLastRouteUID=AUxCwMOJ7d1kE33QCVmW
-# Date: Sun, 22 Mar 2015 18:39:13 GMT
-# Connection: keep-alive
-# Transfer-Encoding: chunked
-```
+##### event
 
-#### POST /create-event
-
->
-  - an event can be anything. From the login to a click event
-  - it's linked to the session via cookie
-  - it can be linked to a route via cookie
+> an event can be anything. From the login to a click event, a submitted form …
 
 - `name:String` name of the event
 - `type:String` success|error describe the nature of the event
 - `message:String` describe the event
-- as always, you can pass extra data, ie. userId
 
-```bash
-curl -XPOST http://localhost:3001/create-route -H "Cookie: foulSessionUID=AUxCwMOJ7d1kE33QCVmW" -d '
-{
-  "userId": 7,
-  "name": "login",
-  "type": "success",
-  "message": null
-}'
+##### error
 
-# HTTP/1.1 200 OK
-# Date: Sun, 22 Mar 2015 18:45:19 GMT
-# Connection: keep-alive
-# Transfer-Encoding: chunked
-```
+there are different kind of errors, but they are all related to a bug somewhere.
 
-#### POST /create-error
+- `type:String` is it "HTTP" error, "javascript" error
+- `message:String` describe the error
+- …
 
-** Only For Chrome **
+###### if the error is an HTTP error:
 
-The stack trace must be sent in a normalised way. Only Chrome is supported right now.
+- `url:String` URL of the query
+- `method:String` HTTP verb (get, post, put …)
+- `name:String` canonical url (/users/13/messages -> /users/:id/messages)
 
->
-  - Errors are linked to a session via cookie
-  - we can specify a stack trace, so that we can find the exact file where the error occured
-  - we could link to a route via cookie
+###### if the error is a javascript error:
 
+- `stack:Array` (only on chrome)
 
-#### POST /create-timing
+##### timing
 
 >
 - a timing can report any duration an event took — from a http query to how long the user took to fill in the form
@@ -167,7 +183,7 @@ Transfer rate:          37.37 [Kbytes/sec] received
 ```
 
 This is extremely slow but it makes sense, I'm using a new Request for every transaction with elasticsearch. Using official elasticsearch package should improve our perfs.
-EDIT: It was ~200, it's now 300. I changed too many things to understand why.
+EDIT: It was ~200 queries per seconds, it's now 300. I changed too many things to understand why.
 
 ## Credits
 

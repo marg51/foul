@@ -34,7 +34,7 @@ exports.createSession = (data, cookies, headers) ->
             family  : agent.device.family
             version : agent.device.toVersion()
 
-    _.merge object, data, {date: Date.now(), previousSessionId: cookies.foulSessionUID}, myip, agent
+    _.merge object, data, {date: Date.now(), previousSessionId: cookies.foulSessionUID, routes: [], events: [], timing: [], errors: []}, myip, agent
 
     # return promsie
     ES.post('session', object)
@@ -54,20 +54,14 @@ exports.update = (session) ->
     ES.put('session', session._id, session._source)
 
 
-exports.addNested = (sessionId, type, promise) ->
+exports.push = (session, type, data) ->
 
-    log.displayESQuery "[NESTED]\t".cyan, type.yellow, sessionId
-    Promise.all([promise, exports.get(sessionId)]).then (data) ->
-        object = data[0]
-        session = data[1]
-        session.lastUpdate = Date.now()
+    log.displayESQuery "[NESTED]\t".cyan, type.yellow, session._id
+    if not session._source[type]?
+        session._source[type] = []
 
-         # we want the _id into nested session objects
-        object._source._id = object._id
+    object = {}
 
-        if !session._source[type]
-            session._source[type] = []
+    _.merge(object,data._source, {_type: data._type, _id: data._id})
 
-        session._source[type].push object._source
-
-        exports.update(session)
+    session._source[type].push(object)

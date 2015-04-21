@@ -32,10 +32,8 @@ exports.createError = (data, cookies) ->
 
     promise = ES.post('error', object).then (data) ->
         data._source = object
-        return data
 
-    sessionManager.addNested(cookies.foulSessionUID, 'errors', promise).then (data) ->
-        return object
+        return data
 
 exports.get = (id) ->
     ES.get('error', id)
