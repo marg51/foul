@@ -12,4 +12,5 @@ exports.createTiming = (data, cookies) ->
         data._source = object
         return data
 
-    sessionManager.addNested cookies.foulSessionUID, 'timings', promise
+    sessionManager.addNested(cookies.foulSessionUID, 'timings', promise).then (data) ->
+        return object

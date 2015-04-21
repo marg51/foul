@@ -24,14 +24,18 @@ exports.createError = (data, cookies) ->
         date: Date.now()
 
     if errors.stack && errors.stack.length > 0
-        _.merge object, 
+        _.merge object,
             file: errors.stack[0].source
             line: errors.stack[0].line
             column: errors.stack[0].column
             functionName: errors.stack[0].functionName,
-        
+
     promise = ES.post('error', object).then (data) ->
         data._source = object
         return data
 
-    sessionManager.addNested cookies.foulSessionUID, 'errors', promise
+    sessionManager.addNested(cookies.foulSessionUID, 'errors', promise).then (data) ->
+        return object
+
+exports.get = (id) ->
+    ES.get('error', id)

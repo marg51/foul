@@ -13,4 +13,5 @@ exports.createRoute = (data, cookies) ->
         data._source = object
         return data
 
-    sessionManager.addNested cookies.foulSessionUID, 'routes', promise
+    sessionManager.addNested(cookies.foulSessionUID, 'routes', promise).then (data) ->
+        return object

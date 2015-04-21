@@ -13,4 +13,5 @@ exports.createEvent = (data, cookies) ->
         data._source = object
         return data
 
-    sessionManager.addNested cookies.foulSessionUID, 'events', promise
+    sessionManager.addNested(cookies.foulSessionUID, 'events', promise).then (data) ->
+        return object

@@ -18,8 +18,9 @@ log = require('./log')
 
 
 handleResponse = (resolver, body) ->
-    if !body._type
+    try
         body = JSON.parse(body)
+    catch e
 
     if(body.status is 400)
         resolver.reject(body)
@@ -41,6 +42,17 @@ exports.post = (name, data) ->
 
        throw new Error(data)
 
+exports.search = (name, data) ->
+    resolver = Promise.pending()
+
+    request.post {url: "http://localhost:9200/foul/#{name}/_search", json: data}, (err, http, body) ->
+        return handleResponse(resolver, body)
+
+    resolver.promise.catch (data) ->
+       console.log data
+
+       throw new Error(data)
+
 
 exports.get = (name, id) ->
     resolver = Promise.pending()
@@ -50,7 +62,7 @@ exports.get = (name, id) ->
         return handleResponse(resolver, body)
 
     resolver.promise.catch (data) ->
-       console.log data
+       console.log JSON.stringify data
 
        throw new Error(data)
 

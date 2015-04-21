@@ -16,7 +16,7 @@ exports.displayFiles = (errors) ->
 
 displayFile = (stack, message="") ->
 	try
-		data = cdl.highlightFileSync config.root_dir+stack.source, linenos: true
+		data = cdl.highlightFileSync stack.source, linenos: true
 		data = data.toString().split('\n')
 
 		line = data[stack.line-1].split(':')
@@ -27,7 +27,7 @@ displayFile = (stack, message="") ->
 		# we create a new line after the error to display the message at the same column the error starts
 		data.splice(stack.line,0,(new Array(stack.column+(stack.line+"").length+3)).join(' ')+"• ".green.bold+message.red)
 
-		# what first line do we want to display ? 
+		# what first line do we want to display ?
 		# from 5 line before the error, if available
 		if stack.line <= 5 then min = 0 else min = stack.line - 5
 
@@ -35,15 +35,15 @@ displayFile = (stack, message="") ->
 		console.log "\n",stack.source.green+':'+(stack.line+"").gray+':'+(stack.functionName+"").cyan,"\n"
 
 		# display 10 lines of the colored file
-		# @todo display only 5lines after the error. 
+		# @todo display only 5lines after the error.
 		# If the error occurs into the first 5lines, it will display 6+ lines after the error
 		console.log data.splice(min,10).join('\n')
 
-	catch e 
+	catch e
 		console.log e.stack
 
 exports.displayESQuery = (queries...) ->
-	# console.log.apply this, queries
+	console.log.apply this, queries
 
 exports.displayHTTPQuery = (queries...) ->
-	# console.log.apply this, queries
+	console.log.apply this, queries

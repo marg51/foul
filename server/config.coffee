@@ -1,3 +1,3 @@
-module.exports = 
-	root_dir: "/www/tailster/Cerberus/Tailster.Web/"
-	sourcemap: "app.js.map" 
+module.exports =
+	root_dir: "/www/dev/foul-api/dist/"
+	sourcemap: "bundle.js.map"
