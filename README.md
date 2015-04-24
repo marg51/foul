@@ -51,7 +51,8 @@ browserEvent -- time elapsed (average) for the page to be fully loaded
 curl -XPOST http://localhost:3001/create-session -d '
 {
   "appVersion": "1.7.4",
-  "prod": false
+  "appHash": "C1F7456",
+  "appEnv": "local"
 }'
 
 # HTTP/1.1 200 OK
