@@ -7,7 +7,7 @@ exports.createEvent = (data, cookies) ->
 
     object = {}
 
-    _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID, routeId: cookies.foulLastRouteUID}
+    _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID}
 
     promise = ES.post('event', object).then (data) ->
         data._source = object

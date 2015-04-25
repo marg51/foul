@@ -19,7 +19,6 @@ exports.createError = (data, cookies) ->
         message: data.message
         data: errors,
         sessionId: cookies.foulSessionUID
-        routeId: cookies.foulLastRouteUID
         previousErrorId: cookies.foulLastErrorUID
         date: Date.now()
 

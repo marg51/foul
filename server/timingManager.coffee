@@ -6,7 +6,7 @@ sessionManager = require('./sessionManager')
 exports.createTiming = (data, cookies) ->
     object = {}
 
-    _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID, routeId: cookies.foulLastRouteUID}
+    _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID}
 
     promise = ES.post('timing', object).then (data) ->
         data._source = object
