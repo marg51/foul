@@ -44,7 +44,7 @@ exports.createSession = (data, cookies, headers) ->
             patch   : agent.device.patch
             version : agent.device.toVersion()
 
-    _.merge object, data, {date: Date.now(), previousSessionId: cookies.foulSessionUID, routes: [], events: [], timing: [], errors: []}, myip, agent
+    _.merge object, data, {date: Date.now(), deviceId: cookies.foulDeviceUID, routes: [], events: [], timing: [], errors: []}, myip, agent
 
     # return promsie
     ES.post('session', object)

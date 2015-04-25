@@ -3,6 +3,7 @@ Promise = require("bluebird")
 require('colors')
 _ = require('lodash')
 log = require('./log')
+utils = require('./utils')
 
 
 # save our <Object>rapport into elasticsearch.
@@ -33,7 +34,7 @@ handleResponse = (resolver, body) ->
 exports.post = (name, data) ->
     resolver = Promise.pending()
 
-    request.post  {url: "http://localhost:9200/foul/#{name}", json: data}, (err, http, body) ->
+    request.post  {url: "http://localhost:9200/foul/#{name}/#{utils.generateId(name)}", json: data}, (err, http, body) ->
         log.displayESQuery "POST\t\t".green, name.yellow
         return handleResponse(resolver, body)
 
