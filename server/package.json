@@ -10,6 +10,7 @@
     "lodash": "^3.5.0",
     "request": "^2.53.0",
     "restify": "^3.0.0",
+    "sanitize-filename": "^1.3.0",
     "source-map": "^0.4.1",
     "useragent": "^2.1.5"
   },

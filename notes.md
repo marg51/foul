@@ -2,6 +2,10 @@
 
 I'm using nested objects *a lot*, every route/event/error is nested into the session it belongs to. It's really powerful, until you realise the impact at index time. Elasticsearch doesn't update like a SQL server would do it. It removes the old document and creates a new one with updated values, and data is re-indexed. The whole document. Everytime. With all routes, all events, all errors. So, it's a bad idea.
 
+EDIT:
+
+Actually, I was *trying* to create some cohort analysis. I made it work thanks to nested objects.
+
 ### Elasticsearch is not always the right tool
 
 It's killing me to say so, but when trying to get the pages with the biggest drop-offs, I realised that elasticsearch is not the right tool to do that.
@@ -36,4 +40,5 @@ I wonder if using elasticsearch and redis could help. Using the power of retriev
 https://keen.io/blog/47823687779/how-to-do-a-retention-analysis/
 https://keen.io/blog/43990368571/how-to-run-a-weekly-cohort-analysis/
 https://cohortanalysis.com
+https://airbrake.io/blog/
 

@@ -1,3 +1,4 @@
 module.exports =
-	root_dir: "/www/dev/foul-api/dist/"
-	sourcemap: "bundle.js.map"
+    root_dir: "/www/dev/foul-dashboard/dist/"
+    git_dir: "/www/dev/foul-dashboard/"
+    sourcemap: "bundle.js.map"

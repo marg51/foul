@@ -77,11 +77,11 @@ createErrorFn = (req, res, session, callback) ->
 
         callback(null, {success: true})
 
-        if(data.type is "javascript")
-            log.displayFiles(data)
+        if(data._source.type is "javascript")
+            log.displayFiles(data._source)
 
     ).catch((data) ->
-        console.log data.stack
+        console.log data._source.stack
         callback(null, {success: false});
     )
 
