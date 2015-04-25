@@ -23,15 +23,25 @@ exports.createSession = (data, cookies, headers) ->
     else myip= {}
 
     agent = useragent.parse(headers["user-agent"])
+
     agent =
         browser:
             family  : agent.family
+            major   : agent.major
+            minor   : agent.minor
+            patch   : agent.patch
             version : agent.toVersion()
         os:
             family  : agent.os.family
+            major   : agent.os.major
+            minor   : agent.os.minor
+            patch   : agent.os.patch
             version : agent.os.toVersion()
         device:
             family  : agent.device.family
+            major   : agent.device.major
+            minor   : agent.device.minor
+            patch   : agent.device.patch
             version : agent.device.toVersion()
 
     _.merge object, data, {date: Date.now(), previousSessionId: cookies.foulSessionUID, routes: [], events: [], timing: [], errors: []}, myip, agent
