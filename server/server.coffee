@@ -9,6 +9,7 @@ eventManager = require('./eventManager')
 timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
 async = require('async');
+utils = require('./utils');
 
 require('colors')
 
@@ -33,6 +34,14 @@ sourcemap = require('./sourcemap')
 
 createSessionFn = (req, res, next) ->
     log.displayHTTPQuery "[CREATE SESSION]\t".green
+
+    # we identify the device if we haven't.
+    # We don't store anything in ES *yet*, only the ID
+    if not req.cookies.foulDeviceUID
+        deviceUID = utils.generateId('device')
+        req.cookies.foulDeviceUID = deviceUID
+        res.setCookie "foulDeviceUID", deviceUID
+
     sessionManager.createSession(req.params, req.cookies, req.headers).then((data) ->
         res.setCookie "foulSessionUID", data._id
         res.send(200)

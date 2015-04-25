@@ -10,4 +10,4 @@ exports.sanitize = (e) ->
     String(e).replace(/[^a-zA-Z0-9]/g, '');
 
 exports.generateId = (type = 'any') ->
-    type+'_'+uuid.v1()
+    type+'_'+uuid.v4()
