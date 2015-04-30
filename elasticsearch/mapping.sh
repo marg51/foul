@@ -1,82 +1,9 @@
 #!/bin/bash
 
-x="curl http://localhost:9200"
-
-# $x/foul -XDELETE
-$x/foul/ -XPUT -d '{
-"mappings": {
-  "track" : {
-    "properties" : {
-      "appVersion" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "browser" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "browserVersion": {
-        "type": "long",
-        "index": "not_analyzed"
-      },
-      "user" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "date": {
-        "type": "date",
-        "format": "dateOptionalTime"
-      },
-      "file" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "line" : {
-        "type" : "long",
-        "index": "not_analyzed"
-      },
-      "column" : {
-        "type" : "long",
-        "index": "not_analyzed"
-      },
-      "functionName" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "state" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "stateParams" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "type" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "category" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      },
-      "message" : {
-        "type" : "string",
-        "index": "not_analyzed"
-      }
-    }
-  }
-}
-}'
-
-# $x/foul/track -XPOST -d '{
-#   "browser": "Chrome",
-#   "user": "laurent@tailster.com",
-#   "message": "$scope.wtf is not a function",
-#   "file": "/app/demo/DemoCtrl.js",
-#   "line": 140,
-#   "column": 15,
-#   "functionName": "Scope.e.dashSearch",
-#   "state": "demo",
-#   "params": "{}"
-
-# }'
+./mapping_user.sh
+./mapping_session.sh
+./mapping_error.sh
+./mapping_acquisition.sh
+./mapping_event.sh
+./mapping_route.sh
+./mapping_timing.sh

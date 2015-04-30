@@ -5,11 +5,11 @@ x="curl http://localhost:9200"
 $x/foul/timing/_mapping -XDELETE
 $x/foul/timing/_mapping -XPOST -d '{
   "properties": {
-    "session_id": {
+    "sessionId": {
       "type": "string",
       "index": "not_analyzed"
     },
-    "routeId": {
+    "deviceId": {
       "type": "string",
       "index": "not_analyzed"
     },
