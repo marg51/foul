@@ -29,7 +29,7 @@ exports.consum = (errors, message) ->
         error.functionName = e.functionName
 
         # we want to be sure that the file is in the correct format
-        if not error.source.replace(/\//g,'') == sanitize(error.source) and error.source.match(config.git_dir)
+        if error.source and (not error.source.replace(/\//g,'') == sanitize(error.source) or not error.source.match(config.git_dir))
             error = {}
 
         error
