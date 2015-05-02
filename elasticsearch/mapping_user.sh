@@ -13,7 +13,7 @@ $x/foul/user/_mapping -XPOST -d '{
         "type": "date",
         "format": "dateTime"
       },
-      "dates": {
+      "events": {
         "type": "object",
         "properties": {
           "first_visit": {
@@ -28,6 +28,3 @@ $x/foul/user/_mapping -XPOST -d '{
       }
     }
   }'
-
-
-$x/foul/user/user_unknown -XPOST -d '{"id":-1}'

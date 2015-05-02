@@ -27,11 +27,9 @@ $x/foul/session/_mapping -XPOST -d '{
           "features": {
             "type": "object",
             "properties": {
-              "isMaster": {
-                "type": "boolean"
-              },
-              "isSplitTesting": {
-                "type": "boolean"
+              "name": {
+                "type": "string",
+                "index": "not_analyzed"
               }
             }
           }
