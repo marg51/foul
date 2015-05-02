@@ -4,14 +4,8 @@ Promise = require("bluebird")
 
 
 exports.create = (session, user, event) ->
-    object = {}
 
-    _.merge(object, session._source, {user: user._source}, event._source)
-
-    ES.post('acquisition', object).then (data) ->
-        data._source = object
-
-        data
+    _.merge({}, session._source, {user: user._source}, event._source)
 
 exports.get = (id) ->
     ES.get('acquisition', id)

@@ -105,11 +105,11 @@ createRouteFn = (req, res, session, params, callback) ->
     object._type = "route"
 
     bulk = []
-    bulk.push({create: { _type: "route", _id}})
+    bulk.push({create: { _type: "route", _id, _parent: session._id}})
     bulk.push(object)
 
-    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
-    bulk.push({script: "ctx._source.routes.push(route)", params: {route: object}})
+    # bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    # bulk.push({script: "ctx._source.routes.push(route)", params: {route: object}})
 
     callback(null, {bulk})
 
@@ -123,11 +123,11 @@ createErrorFn = (req, res, session, params, callback) ->
     object._type = "error"
 
     bulk = []
-    bulk.push({create: { _type: "error", _id}})
+    bulk.push({create: { _type: "error", _id, _parent: session._id}})
     bulk.push(object)
 
-    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
-    bulk.push({script: "ctx._source.errors.push(error)", params: {error: object}})
+    # bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    # bulk.push({script: "ctx._source.errors.push(error)", params: {error: object}})
 
     callback(null, {bulk})
 
@@ -141,11 +141,11 @@ createEventFn = (req, res, session, params, callback) ->
     object._type = "event"
 
     bulk = []
-    bulk.push({create: { _type: "event", _id}})
+    bulk.push({create: { _type: "event", _id, _parent: session._id}})
     bulk.push(object)
 
-    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
-    bulk.push({script: "ctx._source.events.push(event)", params: {event: object}})
+    # bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    # bulk.push({script: "ctx._source.events.push(event)", params: {event: object}})
 
     callback(null, {bulk})
 
@@ -158,11 +158,11 @@ createTimingFn = (req, res, session, params, callback) ->
     object._type = "timing"
 
     bulk = []
-    bulk.push({create: { _type: "timing", _id}})
+    bulk.push({create: { _type: "timing", _id, _parent: session._id}})
     bulk.push(object)
 
-    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
-    bulk.push({script: "ctx._source.timing.push(timing)", params: {timing: object}})
+    # bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    # bulk.push({script: "ctx._source.timing.push(timing)", params: {timing: object}})
 
     callback(null, {bulk})
 

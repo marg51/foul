@@ -29,10 +29,6 @@ exports.create = (data, cookies) ->
             functionName: errors.stack[0].functionName,
 
     return object
-    promise = ES.post('error', object).then (data) ->
-        data._source = object
-
-        return data
 
 exports.get = (id) ->
     ES.get('error', id)

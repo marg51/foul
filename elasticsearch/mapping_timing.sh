@@ -4,6 +4,9 @@ x="curl http://localhost:9200"
 
 $x/foul/timing/_mapping -XDELETE
 $x/foul/timing/_mapping -XPOST -d '{
+  "_parent": {
+    "type": "session"
+  },
   "properties": {
     "sessionId": {
       "type": "string",

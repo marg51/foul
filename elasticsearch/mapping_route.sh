@@ -4,6 +4,9 @@ x="curl http://localhost:9200"
 
 $x/foul/route/_mapping -XDELETE
 $x/foul/route/_mapping -XPUT -d '{
+  "_parent": {
+    "type": "session"
+  },
   "properties": {
     "sessionId" : {
       "type" : "string",

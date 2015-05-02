@@ -51,7 +51,7 @@ exports.createSession = (data, cookies, headers) ->
             esId: "user_unknown"
             known: false
 
-    _.merge object, data, {date: Date.now(), updatedAt: Date.now(), deviceId: cookies.foulDeviceUID, routes: [], events: [], timing: [], errors: []}, myip, agent
+    _.merge object, data, {date: Date.now(), updatedAt: Date.now(), deviceId: cookies.foulDeviceUID}, myip, agent
 
     # return promsie
     ES.post('session', object)
