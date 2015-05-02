@@ -5,6 +5,11 @@ _ = require('lodash')
 log = require('./log')
 utils = require('./utils')
 
+elasticsearch = require('elasticsearch');
+client = new elasticsearch.Client
+  host: 'localhost:9200',
+  # log: 'trace'
+
 
 # save our <Object>rapport into elasticsearch.
 # exports.save = (rapport) ->
@@ -31,17 +36,15 @@ handleResponse = (resolver, body) ->
         log.displayESQuery '[RESOLVED]\t'.magenta,body._type,body._id,"\n"
         resolver.resolve(body)
 
-exports.post = (name, data) ->
-    resolver = Promise.pending()
+exports.post = (name, data, params = {}) ->
 
-    request.post  {url: "http://localhost:9200/foul/#{name}/#{utils.generateId(name)}", json: data}, (err, http, body) ->
-        log.displayESQuery "POST\t\t".green, name.yellow
-        return handleResponse(resolver, body)
-
-    resolver.promise.catch (data) ->
-       console.log data
-
-       throw new Error(data)
+  client.create
+    index: "foul"
+    type: name
+    id: params.id || utils.generateId(name)
+    parent: params.parent
+    body:
+      data
 
 exports.search = (name, data) ->
     resolver = Promise.pending()
@@ -56,16 +59,12 @@ exports.search = (name, data) ->
 
 
 exports.get = (name, id) ->
-    resolver = Promise.pending()
+  console.log "get", name, id
 
-    request.get  {url: "http://localhost:9200/foul/#{name}/#{id}"}, (err, http, body) ->
-        log.displayESQuery "GET\t\t".green, name.yellow, id
-        return handleResponse(resolver, body)
-
-    resolver.promise.catch (data) ->
-       console.log JSON.stringify data
-
-       throw new Error(data)
+  client.get
+    index: "foul"
+    type: name
+    id: id
 
 # @todo need to update the contract
 # instead of sending name + id + object._source everytime, we could send directly object and use _id, _type, _source to update accordingly
