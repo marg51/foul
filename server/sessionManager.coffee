@@ -16,33 +16,40 @@ exports.createSession = (data, cookies, headers) ->
 
     if myip
         myip =
-            location: myip.ll
-            country : myip.country
-            region  : myip.region
-            city    : myip.city
+            location:
+                location: myip.ll
+                country : myip.country
+                region  : myip.region
+                city    : myip.city
     else myip= {}
 
     agent = useragent.parse(headers["user-agent"])
 
     agent =
-        browser:
-            family  : agent.family
-            major   : agent.major
-            minor   : agent.minor
-            patch   : agent.patch
-            version : agent.toVersion()
-        os:
-            family  : agent.os.family
-            major   : agent.os.major
-            minor   : agent.os.minor
-            patch   : agent.os.patch
-            version : agent.os.toVersion()
         device:
-            family  : agent.device.family
-            major   : agent.device.major
-            minor   : agent.device.minor
-            patch   : agent.device.patch
-            version : agent.device.toVersion()
+            browser:
+                family  : agent.family
+                major   : agent.major
+                minor   : agent.minor
+                patch   : agent.patch
+                version : agent.toVersion()
+            os:
+                family  : agent.os.family
+                major   : agent.os.major
+                minor   : agent.os.minor
+                patch   : agent.os.patch
+                version : agent.os.toVersion()
+            device:
+                family  : agent.device.family
+                major   : agent.device.major
+                minor   : agent.device.minor
+                patch   : agent.device.patch
+                version : agent.device.toVersion()
+
+    user =
+        user:
+            esId: "user_unknown"
+            known: false
 
     _.merge object, data, {date: Date.now(), updatedAt: Date.now(), deviceId: cookies.foulDeviceUID, routes: [], events: [], timing: [], errors: []}, myip, agent
 
@@ -61,8 +68,8 @@ exports.get = (sessionId) ->
 
 exports.update = (session) ->
     session._source.updatedAt = Date.now()
-    ES.put('session', session._id, session._source)
 
+    ES.put('session', session._id, session._source)
 
 exports.push = (session, type, data) ->
 

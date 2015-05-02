@@ -6,6 +6,7 @@
   "dependencies": {
     "bluebird": "^2.9.14",
     "colors": "^1.0.3",
+    "elasticsearch": "^4.0.2",
     "geoip-lite": "^1.1.6",
     "lodash": "^3.5.0",
     "node-uuid": "^1.4.3",

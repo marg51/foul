@@ -6,6 +6,8 @@ sessionManager = require('./sessionManager')
 errorManager = require('./errorManager')
 routeManager = require('./routeManager')
 eventManager = require('./eventManager')
+userManager = require('./userManager')
+acquisitionManager = require('./acquisitionManager')
 timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
 async = require('async');
@@ -55,13 +57,38 @@ server.post '/create-session', createSessionFn
 
 
 identifyFn = (req, res, session, callback) ->
-    sessionManager.updateUserId(req.cookies.foulSessionUID,req.params.userId).then(() ->
-        callback(null, {success: true})
-    ).catch(()->
-        callback(null, {success: false});
-    )
-    next()
+    userId = _.get(req.params, 'user.id')
 
+    if not userId
+        return callback(null, {success: false, message: "need user.id"})
+
+    session._source.user = {id: userId};
+
+    userId = "user_#{userId}"
+    userManager.getOrCreate(userId, req.params).then((user) ->
+        userManager.identify(userId, session).then(() ->
+            callback(null, {success: true})
+        )
+    ).catch((e)->
+        console.log e.stack
+        callback(null, {success: false, message: e.message});
+    )
+
+addAcquisitionFn = (session, event, callback) ->
+    userId = _.get(session, '_source.user.id')
+
+    if not userId
+        return callback(null, {success: false, message: "need user.id"})
+
+
+    userId = "user_#{userId}"
+    userManager.get(userId).then((user) ->
+        acquisitionManager.create(session, user, event).then ->
+            callback(null, {success: true})
+    ).catch((e)->
+        console.log e.stack
+        callback(null, {success: false, message: "acquisition: "+e.message});
+    )
 
 createRouteFn = (req, res, session, callback) ->
     log.displayHTTPQuery "[CREATE ROUTE]\t".cyan, "session", session._id.gray
@@ -101,10 +128,12 @@ createEventFn = (req, res, session, callback) ->
     eventManager.createEvent(req.params, req.cookies).then((data)->
         console.log data._id, data._type
         sessionManager.push(session, 'events', data)
-
-        callback(null, {success: true})
-    ).catch(()->
-        callback(null, {success: false});
+        if req.params.type is "acquisition"
+            addAcquisitionFn(session, data, callback)
+        else
+            callback(null, {success: true})
+    ).catch((e)->
+        callback(null, {success: false, message: e.message});
     )
 
 createTimingFn = (req, res, session, callback) ->
@@ -136,6 +165,8 @@ server.post '/bulk', (req, res, next) ->
                 fn = createTimingFn
             else if(query.name is 'identify')
                 fn = identifyFn
+            else if(query.name is 'acquisition')
+                fn = acquisitionFn
             else
                 console.log query.name
                 fn = (a,b,c,d,callback) ->
@@ -155,7 +186,8 @@ server.post '/bulk', (req, res, next) ->
 
             sessionManager.update(session).then ->
                 res.send({result: result});
-    ).catch ->
+    ).catch (e)->
+        console.log "Not Found ?", e.stack
         res.send(404, "session not found")
 
 
@@ -164,14 +196,14 @@ server.post '/bulk', (req, res, next) ->
 
 Cors = (req, res, next) ->
     res.header('Access-Control-Allow-Credentials', true);
-    res.header('Access-Control-Allow-Headers', 'authorizationData, Authorization, Content-Type, Accept-Encoding, Accept-Language');
+    res.header('Access-Control-Allow-Headers', 'authorizationData, Authorization, Content-Type, Accept-Encoding, Accept-Language, Cookie');
     res.header('Access-Control-Allow-Methods', '*');
     res.header('Access-Control-Allow-Origin', '*');
 
     return res.send(204);
 
-server.opts '/errors', Cors
-server.opts '/routes', Cors
+server.opts '/create-session', Cors
+server.opts '/bulk', Cors
 
 server.listen 3001, ->
     console.log 'localhost:'+3001

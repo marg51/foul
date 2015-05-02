@@ -19,7 +19,6 @@ exports.createError = (data, cookies) ->
         message: data.message
         data: errors,
         sessionId: cookies.foulSessionUID
-        previousErrorId: cookies.foulLastErrorUID
         date: Date.now()
 
     if errors.stack && errors.stack.length > 0
