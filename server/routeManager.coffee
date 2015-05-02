@@ -9,6 +9,7 @@ exports.createRoute = (data, cookies) ->
     _.merge object, data, {date: Date.now(), sessionId: cookies.foulSessionUID}
 
 
+    return object
     promise = ES.post('route', object).then (data) ->
         data._source = object
 

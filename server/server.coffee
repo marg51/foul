@@ -56,16 +56,22 @@ server.post '/create-session', createSessionFn
 
 
 
-identifyFn = (req, res, session, callback) ->
-    userId = _.get(req.params, 'user.id')
+identifyFn = (req, res, session, params, callback) ->
+    userId = _.get(params.data, 'user.id')
+    token = _.get(params.data, 'user.token')
 
-    if not userId
-        return callback(null, {success: false, message: "need user.id"})
-
-    session._source.user = {id: userId};
+    if not userId or not token
+        return callback(null, {success: false, message: "need user.id and user.token"})
 
     userId = "user_#{userId}"
-    userManager.getOrCreate(userId, req.params).then((user) ->
+    bulk = []
+    userManager.get(userId, req.params).then((user) ->
+        bulk.push({update: {_type: 'user', _id: userId}})
+        bulk.push({doc: {lastLogin: Date.now()}})
+
+        bulk.push({update: {_type: 'session', _id: session._id}})
+        bulk.push({doc: {user: user._source}})
+
         userManager.identify(userId, session).then(() ->
             callback(null, {success: true})
         )
@@ -90,68 +96,82 @@ addAcquisitionFn = (session, event, callback) ->
         callback(null, {success: false, message: "acquisition: "+e.message});
     )
 
-createRouteFn = (req, res, session, callback) ->
-    log.displayHTTPQuery "[CREATE ROUTE]\t".cyan, "session", session._id.gray
+createRouteFn = (req, res, session, params, callback) ->
 
-    routeManager.createRoute(req.params, req.cookies).then((data) ->
-        console.log data._id, data._type
-        sessionManager.push(session, 'routes', data);
+    object = routeManager.createRoute(params.data, req.cookies)
+    _id = utils.generateId('route')
 
-        callback(null, {sucess: true, data: id: data._id})
-    ).catch((data) ->
-        console.log "Can't save route".magenta, data.stack
-        callback(null, {success: false, message: "can't save route"});
-    )
+    object._id = _id
+    object._type = "route"
 
+    bulk = []
+    bulk.push({create: { _type: "route", _id}})
+    bulk.push(object)
 
-createErrorFn = (req, res, session, callback) ->
-    log.displayHTTPQuery "[CREATE ERROR]\t".cyan, "session", session._id.gray
+    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    bulk.push({script: "ctx._source.routes.push(route)", params: {route: object}})
 
-    errorManager.createError(req.params, req.cookies).then((data) ->
-        console.log data._id, data._type
-        sessionManager.push(session, 'errors', data);
-
-        callback(null, {success: true})
-
-        if(data._source.type is "javascript")
-            log.displayFiles(data._source)
-
-    ).catch((data) ->
-        console.log data._source.stack
-        callback(null, {success: false});
-    )
+    callback(null, {bulk})
 
 
-createEventFn = (req, res, session, callback) ->
-    log.displayHTTPQuery "[CREATE EVENT]\t".cyan, "session", session._id.gray
+createErrorFn = (req, res, session, params, callback) ->
 
-    eventManager.createEvent(req.params, req.cookies).then((data)->
-        console.log data._id, data._type
-        sessionManager.push(session, 'events', data)
-        if req.params.type is "acquisition"
-            addAcquisitionFn(session, data, callback)
-        else
-            callback(null, {success: true})
-    ).catch((e)->
-        callback(null, {success: false, message: e.message});
-    )
+    object = errorManager.create(params.data, req.cookies)
+    _id = utils.generateId('error')
 
-createTimingFn = (req, res, session, callback) ->
-    log.displayHTTPQuery "[CREATE TIMING]\t".cyan, "session", session._id.gray
+    object._id = _id
+    object._type = "error"
 
-    timingManager.createTiming(req.params, req.cookies).then((data)->
-        console.log data._id, data._type
-        sessionManager.push(session, 'timing', data);
+    bulk = []
+    bulk.push({create: { _type: "error", _id}})
+    bulk.push(object)
 
-        callback(null, {success: true})
-    ).catch(()->
-        callback(null, {success: false});
-    )
+    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    bulk.push({script: "ctx._source.errors.push(error)", params: {error: object}})
 
+    callback(null, {bulk})
+
+
+createEventFn = (req, res, session, params, callback) ->
+
+    object = eventManager.create(params.data, req.cookies)
+    _id = utils.generateId('event')
+
+    object._id = _id
+    object._type = "event"
+
+    bulk = []
+    bulk.push({create: { _type: "event", _id}})
+    bulk.push(object)
+
+    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    bulk.push({script: "ctx._source.events.push(event)", params: {event: object}})
+
+    callback(null, {bulk})
+
+createTimingFn = (req, res, session, params, callback) ->
+
+    object = timingManager.create(params.data, req.cookies)
+    _id = utils.generateId('timing')
+
+    object._id = _id
+    object._type = "timing"
+
+    bulk = []
+    bulk.push({create: { _type: "timing", _id}})
+    bulk.push(object)
+
+    bulk.push({update: { _type: "session", _id: session._id, _retry_on_conflict: 5}})
+    bulk.push({script: "ctx._source.timing.push(timing)", params: {timing: object}})
+
+    callback(null, {bulk})
+
+actionNotfoundFn = (req, res, session, params, callback) ->
+    callback(null, {success:false, message: params.name+" doesn't exist"});
 
 server.post '/bulk', (req, res, next) ->
     sessionManager.get(req.cookies.foulSessionUID).then((session) ->
-        promises = _.map req.params, (query) ->
+        queries = _.map req.params, (query) ->
             # @todo frontend side
             query.data.time = query.time
 
@@ -161,31 +181,37 @@ server.post '/bulk', (req, res, next) ->
                 fn = createErrorFn
             else if(query.name is 'event')
                 fn = createEventFn
-            else if(query.name is 'timing')
+            if(query.name is 'timing')
                 fn = createTimingFn
             else if(query.name is 'identify')
                 fn = identifyFn
-            else if(query.name is 'acquisition')
-                fn = acquisitionFn
+            # else if(query.name is 'acquisition')
+            #     fn = acquisitionFn
             else
-                console.log query.name
-                fn = (a,b,c,d,callback) ->
-                    callback(null, {success:false, message: query.name+" doesn't exist"});
+                fn = actionNotfoundFn
 
             return (callback) ->
-                fn({params: query.data, cookies: req.cookies}, res, session, callback)
+                fn(req, res, session, query, callback)
 
-        async.parallel promises, (err, results) ->
+        async.parallel queries, (err, results) ->
             if err
                 console.log "err", err
                 return res.send 500
 
-            result = []
-            _.map results, (e, i) ->
-                result.push(_.merge({name: req.params[i].name}, e))
 
-            sessionManager.update(session).then ->
-                res.send({result: result});
+
+            bulk = []
+            _.map results, (e, i) ->
+                _.map e.bulk, (f, i) ->
+                    bulk.push(f)
+
+            ES.client.bulk({body:bulk,index: "foul"}).then((data)->
+                console.log JSON.stringify(data, null, 4) if data.errors
+                res.send {took: data.took, errors: data.errors}
+            ).catch (e) ->
+                console.log e
+                res.send 500, {e: e}
+
     ).catch (e)->
         console.log "Not Found ?", e.stack
         res.send(404, "session not found")

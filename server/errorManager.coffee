@@ -5,7 +5,7 @@ sessionManager = require('./sessionManager')
 Promise = require("bluebird")
 
 
-exports.createError = (data, cookies) ->
+exports.create = (data, cookies) ->
     errors = {}
 
     if(data.type is "javascript")
@@ -28,6 +28,7 @@ exports.createError = (data, cookies) ->
             column: errors.stack[0].column
             functionName: errors.stack[0].functionName,
 
+    return object
     promise = ES.post('error', object).then (data) ->
         data._source = object
 
