@@ -80,20 +80,25 @@ identifyFn = (req, res, session, params, callback) ->
         callback(null, {success: false, message: e.message});
     )
 
-addAcquisitionFn = (session, event, callback) ->
+acquisitionFn = (req, res, session, params, callback) ->
     userId = _.get(session, '_source.user.id')
 
     if not userId
         return callback(null, {success: false, message: "need user.id"})
 
 
+    bulk = []
     userId = "user_#{userId}"
+    _id = utils.generateId('route')
     userManager.get(userId).then((user) ->
-        acquisitionManager.create(session, user, event).then ->
-            callback(null, {success: true})
+        acquisition = acquisitionManager.create(session, user, params.data)
+        bulk.push({create: {_type: 'acquisition', _id}})
+        bulk.push(acquisition)
+
+        callback(null, {bulk})
     ).catch((e)->
         console.log e.stack
-        callback(null, {success: false, message: "acquisition: "+e.message});
+        callback(null, {success: false, message: "can't find user"});
     )
 
 createRouteFn = (req, res, session, params, callback) ->
@@ -181,12 +186,10 @@ server.post '/bulk', (req, res, next) ->
                 fn = createErrorFn
             else if(query.name is 'event')
                 fn = createEventFn
-            if(query.name is 'timing')
+            else if(query.name is 'timing')
                 fn = createTimingFn
             else if(query.name is 'identify')
                 fn = identifyFn
-            # else if(query.name is 'acquisition')
-            #     fn = acquisitionFn
             else
                 fn = actionNotfoundFn
 
@@ -202,12 +205,16 @@ server.post '/bulk', (req, res, next) ->
 
             bulk = []
             _.map results, (e, i) ->
+                e.name = req.params[i].name
                 _.map e.bulk, (f, i) ->
                     bulk.push(f)
 
+            console.log JSON.stringify results, null, 4
+            if bulk.length is 0
+                return res.send 204
             ES.client.bulk({body:bulk,index: "foul"}).then((data)->
                 console.log JSON.stringify(data, null, 4) if data.errors
-                res.send {took: data.took, errors: data.errors}
+                res.send data # {took: data.took, errors: data.errors}
             ).catch (e) ->
                 console.log e
                 res.send 500, {e: e}
