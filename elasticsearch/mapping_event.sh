@@ -5,7 +5,7 @@ x="curl http://localhost:9200"
 $x/foul/event/_mapping -XDELETE
 $x/foul/event/_mapping -XPOST -d '{
   "_parent": {
-    "type": "user"
+    "type": "session"
   },
   "properties" : {
     "sessionId" : {
