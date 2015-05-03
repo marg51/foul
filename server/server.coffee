@@ -12,6 +12,7 @@ timingManager = require('./timingManager')
 CookieParser= require('restify-cookies')
 async = require('async');
 utils = require('./utils');
+redis = require('./redis');
 
 require('colors')
 
@@ -56,7 +57,7 @@ server.post '/create-session', createSessionFn
 
 
 
-identifyFn = (req, res, session, params, callback) ->
+identifyFn = (req, res, session, params, auth, callback) ->
     userId = _.get(params.data, 'user.id')
     token = _.get(params.data, 'user.token')
 
@@ -76,21 +77,24 @@ identifyFn = (req, res, session, params, callback) ->
             callback(null, {success: true})
         )
     ).catch((e)->
-        console.log e.stack
-        callback(null, {success: false, message: e.message});
+        callback(null, {success: false, message: e});
     )
 
-acquisitionFn = (req, res, session, params, callback) ->
-    userId = _.get(session, '_source.user.id')
+acquisitionFn = (req, res, session, params, auth, callback) ->
+    if auth.type isnt "private"
+        return callback(null, {success: false, message: 403})
 
-    if not userId
-        return callback(null, {success: false, message: "need user.id"})
+    userId = _.get(params.data, 'user.id')
+    userToken = _.get(params.data, 'user.token')
+
+    if not userId or not userToken
+        return callback(null, {success: false, message: "need user.id and user.token"})
 
 
     bulk = []
     userId = "user_#{userId}"
     _id = utils.generateId('route')
-    userManager.get(userId).then((user) ->
+    userManager.get(userId, userToken).then((user) ->
         acquisition = acquisitionManager.create(session, user, params.data)
         bulk.push({create: {_type: 'acquisition', _id}})
         bulk.push(acquisition)
@@ -101,7 +105,7 @@ acquisitionFn = (req, res, session, params, callback) ->
         callback(null, {success: false, message: "can't find user"});
     )
 
-createRouteFn = (req, res, session, params, callback) ->
+createRouteFn = (req, res, session, params, auth, callback) ->
 
     object = routeManager.createRoute(params.data, req.cookies)
     _id = utils.generateId('route')
@@ -119,7 +123,7 @@ createRouteFn = (req, res, session, params, callback) ->
     callback(null, {bulk})
 
 
-createErrorFn = (req, res, session, params, callback) ->
+createErrorFn = (req, res, session, params, auth, callback) ->
 
     object = errorManager.create(params.data, req.cookies)
     _id = utils.generateId('error')
@@ -137,7 +141,7 @@ createErrorFn = (req, res, session, params, callback) ->
     callback(null, {bulk})
 
 
-createEventFn = (req, res, session, params, callback) ->
+createEventFn = (req, res, session, params, auth, callback) ->
 
     object = eventManager.create(params.data, req.cookies)
     _id = utils.generateId('event')
@@ -154,7 +158,7 @@ createEventFn = (req, res, session, params, callback) ->
 
     callback(null, {bulk})
 
-createTimingFn = (req, res, session, params, callback) ->
+createTimingFn = (req, res, session, params, auth, callback) ->
 
     object = timingManager.create(params.data, req.cookies)
     _id = utils.generateId('timing')
@@ -171,57 +175,65 @@ createTimingFn = (req, res, session, params, callback) ->
 
     callback(null, {bulk})
 
-actionNotfoundFn = (req, res, session, params, callback) ->
+actionNotfoundFn = (req, res, session, params, auth, callback) ->
     callback(null, {success:false, message: params.name+" doesn't exist"});
 
 server.post '/bulk', (req, res, next) ->
-    sessionManager.get(req.cookies.foulSessionUID).then((session) ->
-        queries = _.map req.params, (query) ->
-            # @todo frontend side
-            query.data.time = query.time
+    if not req.headers['x-foul-token']
+        return res.send 401
 
-            if(query.name is 'route')
-                fn = createRouteFn
-            else if(query.name is 'error')
-                fn = createErrorFn
-            else if(query.name is 'event')
-                fn = createEventFn
-            else if(query.name is 'timing')
-                fn = createTimingFn
-            else if(query.name is 'identify')
-                fn = identifyFn
-            else
-                fn = actionNotfoundFn
+    redis.getToken(req.headers['x-foul-token']).then((auth) ->
+        sessionManager.get(req.cookies.foulSessionUID).then((session) ->
+            queries = _.map req.params, (query) ->
+                # @todo frontend side
+                query.data.time = query.time
 
-            return (callback) ->
-                fn(req, res, session, query, callback)
+                if(query.name is 'route')
+                    fn = createRouteFn
+                else if(query.name is 'error')
+                    fn = createErrorFn
+                else if(query.name is 'event')
+                    fn = createEventFn
+                else if(query.name is 'timing')
+                    fn = createTimingFn
+                else if(query.name is 'identify')
+                    fn = identifyFn
+                else if(query.name is 'acquisition')
+                    fn = acquisitionFn
+                else
+                    fn = actionNotfoundFn
 
-        async.parallel queries, (err, results) ->
-            if err
-                console.log "err", err
-                return res.send 500
+                return (callback) ->
+                    fn(req, res, session, query, auth, callback)
+
+            async.parallel queries, (err, results) ->
+                if err
+                    console.log "err", err
+                    return res.send 500
 
 
 
-            bulk = []
-            _.map results, (e, i) ->
-                e.name = req.params[i].name
-                _.map e.bulk, (f, i) ->
-                    bulk.push(f)
+                bulk = []
+                _.map results, (e, i) ->
+                    e.name = req.params[i].name
+                    _.map e.bulk, (f, i) ->
+                        bulk.push(f)
 
-            console.log JSON.stringify results, null, 4
-            if bulk.length is 0
-                return res.send 204
-            ES.client.bulk({body:bulk,index: "foul"}).then((data)->
-                console.log JSON.stringify(data, null, 4) if data.errors
-                res.send data # {took: data.took, errors: data.errors}
-            ).catch (e) ->
-                console.log e
-                res.send 500, {e: e}
+                console.log JSON.stringify results, null, 4
+                if bulk.length is 0
+                    return res.send 204
+                ES.client.bulk({body:bulk,index: "foul"}).then((data)->
+                    console.log JSON.stringify(data, null, 4) if data.errors
+                    res.send data # {took: data.took, errors: data.errors}
+                ).catch (e) ->
+                    console.log e
+                    res.send 500, {e: e}
 
-    ).catch (e)->
-        console.log "Not Found ?", e.stack
-        res.send(404, "session not found")
+        ).catch (e)->
+            console.log "Not Found ?", e.stack
+            res.send(404, "session not found")
+    ).catch (e) ->
+        res.send 403, e
 
 
     next()

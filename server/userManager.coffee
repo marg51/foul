@@ -30,8 +30,11 @@ exports.identify = (userId, session) ->
         session._source.user = _.merge({},user._source);
         session._source.user.esId = user._id
 
-exports.get = (id) ->
-    ES.get('user', id)
+exports.get = (id, token) ->
+    ES.get('user', id).then (data) ->
+        if _.get(data._source, 'user.token') isnt token
+            return Promise.reject('token doesnt match')
+        data
 
 exports.update = (user) ->
     ES.put(user, user._id, user._source)

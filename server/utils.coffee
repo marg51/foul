@@ -11,3 +11,6 @@ exports.sanitize = (e) ->
 
 exports.generateId = (type = 'any') ->
     type+'_'+uuid.v4()
+
+exports.generateBigId = (type = 'any') ->
+    type+'_'+uuid.v4()+uuid.v1()
