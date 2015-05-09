@@ -29,25 +29,5 @@ aggs:
 
 
 }, (err, data) ->
-    # return console.log JSON.stringify data.body
-
-    result = []
-    _.map data.body.aggregations.value.buckets, (f) ->
-      el = {}
-      el.name = f.key
-      el.total_user = f.value.buckets[0].value.buckets.length
-      el.data = []
-      el.unit = "day"
-      _.map f.value.buckets, (e) ->
-        el.data.push({x:+e.key,y:e.value.buckets.length/el.total_user*100})
-      # el.name  = moment(f.key).format("ddd DD, MMM YY")
-
-      result.push(el)
-
-    # console.log(JSON.stringify(result));
-
-    _.map result, (e) ->
-      console.log e.name.cyan, ("("+e.total_user+" signups)").yellow
-      _.map e.data, (f) ->
-        console.log ("day "+f.x).gray,"->",(f.y+"%").green
+    return console.log JSON.stringify data.body.aggregations
 )

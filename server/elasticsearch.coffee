@@ -59,13 +59,14 @@ exports.search = (name, data) ->
        throw new Error(data)
 
 
-exports.get = (name, id) ->
+exports.get = (name, id, params = {}) ->
   console.log "get", name, id
 
   client.get
     index: "foul"
     type: name
     id: id
+    parent: params.parent
 
 # @todo need to update the contract
 # instead of sending name + id + object._source everytime, we could send directly object and use _id, _type, _source to update accordingly

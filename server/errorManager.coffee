@@ -30,5 +30,5 @@ exports.create = (data, cookies) ->
 
     return object
 
-exports.get = (id) ->
-    ES.get('error', id)
+exports.get = (sessionId, id) ->
+    ES.get('error', id, {parent: sessionId})

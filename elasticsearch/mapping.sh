@@ -7,3 +7,4 @@
 ./mapping_event.sh
 ./mapping_route.sh
 ./mapping_timing.sh
+./mapping_device.sh

@@ -35,26 +35,9 @@ $x/foul/session/_mapping -XPOST -d '{
           }
         }
       },
-      "user" : {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type" : "string",
-            "index": "not_analyzed"
-          },
-          "esId": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "fist_visit": {
-            "type": "date",
-            "format": "dateTime"
-          },
-          "signup": {
-            "type": "date",
-            "format": "dateTime"
-          }
-        }
+      "user_id" : {
+        "type": "string",
+        "index": "not_analyzed"
       },
       "location": {
         "type": "object",

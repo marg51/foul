@@ -13,18 +13,9 @@ $x/foul/user/_mapping -XPOST -d '{
         "type": "date",
         "format": "dateTime"
       },
-      "events": {
-        "type": "object",
-        "properties": {
-          "first_visit": {
-            "type": "date",
-            "format": "dateTime"
-          },
-          "signup": {
-            "type": "date",
-            "format": "dateTime"
-          }
-        }
+      "signup": {
+        "type": "date",
+        "format": "dateTime"
       }
     }
   }'

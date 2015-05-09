@@ -71,11 +71,9 @@ identifyFn = (req, res, session, params, auth, callback) ->
         bulk.push({doc: {lastLogin: Date.now()}})
 
         bulk.push({update: {_type: 'session', _id: session._id}})
-        bulk.push({doc: {user: user._source}})
+        bulk.push({doc: {user_id: user._source.id}})
 
-        userManager.identify(userId, session).then(() ->
-            callback(null, {success: true})
-        )
+        callback(null, {bulk})
     ).catch((e)->
         callback(null, {success: false, message: e});
     )
@@ -87,23 +85,20 @@ acquisitionFn = (req, res, session, params, auth, callback) ->
     userId = _.get(params.data, 'user.id')
     userToken = _.get(params.data, 'user.token')
 
-    if not userId or not userToken
-        return callback(null, {success: false, message: "need user.id and user.token"})
-
+    user = {}
 
     bulk = []
     userId = "user_#{userId}"
-    _id = utils.generateId('route')
-    userManager.get(userId, userToken).then((user) ->
-        acquisition = acquisitionManager.create(session, user, params.data)
+    _id = utils.generateId('acquisition')
+
+    userManager.get(userId, userToken).then((_user_) ->
+        user = _user_;
+    ).finally () ->
+        acquisition = acquisitionManager.create(session, user, eventManager.create(params.data, req.cookies))
         bulk.push({create: {_type: 'acquisition', _id}})
         bulk.push(acquisition)
 
         callback(null, {bulk})
-    ).catch((e)->
-        console.log e.stack
-        callback(null, {success: false, message: "can't find user"});
-    )
 
 createRouteFn = (req, res, session, params, auth, callback) ->
 
